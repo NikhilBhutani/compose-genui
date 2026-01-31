@@ -76,7 +76,8 @@ private const val SAMPLE_DOC_JSON = """
         "children": [
           { "type": "textfield", "id": "name", "props": { "label": "Your name", "width": 220 } },
           { "type": "button", "id": "submit", "props": { "label": "Submit" } },
-          { "type": "button", "id": "cancel", "props": { "label": "Cancel", "variant": "outlined" } }
+          { "type": "button", "id": "cancel", "props": { "label": "Cancel", "variant": "outlined" } },
+          { "type": "iconButton", "props": { "name": "settings" } }
         ]
       },
       { "type": "divider" },
@@ -160,6 +161,23 @@ private const val SAMPLE_DOC_JSON = """
               { "type": "text", "props": { "text": "List item C" } }
             ]
           }
+        ]
+      },
+      {
+        "type": "listRow",
+        "props": { "spacing": 12, "padding": 4 },
+        "children": [
+          { "type": "chip", "props": { "label": "Compose", "icon": "favorite" } },
+          { "type": "chip", "props": { "label": "GenUI" } },
+          { "type": "chip", "props": { "label": "A2UI" } }
+        ]
+      },
+      {
+        "type": "row",
+        "props": { "spacing": 12, "verticalAlignment": "center" },
+        "children": [
+          { "type": "progress", "props": { "variant": "circular" } },
+          { "type": "progress", "props": { "variant": "linear", "value": 0.6, "fill": "width" } }
         ]
       },
       {

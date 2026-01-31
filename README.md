@@ -21,13 +21,15 @@ At a high level:
 4. State updates trigger Compose recomposition.
 
 ## Built-in components (current)
-- Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`, `list`, `listItem`
-- Inputs: `textfield`, `button`, `checkbox`, `switch`, `slider`
+- Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`, `list`, `listRow`, `listItem`
+- Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `switch`, `slider`, `chip`, `progress`
 - Text: `text`
 - Media: `image`, `icon`
 
 ## Common style props (selected)
 - Layout: `padding`, `spacing`, `fill`, `width`, `height`, `size`, `reverse`
+- Buttons: `variant` (filled|outlined|text)
+- Progress: `variant` (circular|linear), `value`
 - Shape: `cornerRadius`, `borderWidth`, `borderColor`
 - Surface: `elevation`
 - Text: `fontSize`, `fontWeight`, `fontStyle`, `textAlign`, `lineHeight`, `letterSpacing`, `color`

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -20,12 +21,16 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -144,6 +149,67 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 }
                 else -> Button(modifier = node.props.toModifier(), enabled = enabled, onClick = onClick) {
                     Text(text = label)
+                }
+            }
+        },
+        "iconButton" to { node, state, onEvent, renderChild ->
+            val name = node.props.string("name") ?: "info"
+            val vector = iconByName(name)
+            if (vector != null) {
+                val enabled = node.props.bool("enabled") ?: true
+                val tint = node.props.color("color") ?: Color.Unspecified
+                IconButton(
+                    modifier = node.props.toModifier(),
+                    enabled = enabled,
+                    onClick = {
+                        val id = node.id ?: "iconButton"
+                        onEvent(A2UiEvent(id, "click"))
+                    }
+                ) {
+                    Icon(
+                        imageVector = vector,
+                        contentDescription = node.props.string("contentDescription"),
+                        tint = tint
+                    )
+                }
+            }
+        },
+        "chip" to { node, state, onEvent, renderChild ->
+            val label = node.props.string("label") ?: "Chip"
+            val enabled = node.props.bool("enabled") ?: true
+            val iconName = node.props.string("icon")
+            val iconVector = iconName?.let { iconByName(it) }
+            AssistChip(
+                modifier = node.props.toModifier(),
+                onClick = {
+                    val id = node.id ?: "chip"
+                    onEvent(A2UiEvent(id, "click"))
+                },
+                enabled = enabled,
+                label = { Text(label) },
+                leadingIcon = if (iconVector != null) {
+                    { Icon(imageVector = iconVector, contentDescription = null) }
+                } else null
+            )
+        },
+        "progress" to { node, state, onEvent, renderChild ->
+            val variant = node.props.string("variant") ?: "circular"
+            val value = node.props.float("value")
+            val progress = value?.coerceIn(0f, 1f)
+            when (variant) {
+                "linear" -> {
+                    if (progress != null) {
+                        LinearProgressIndicator(modifier = node.props.toModifier(), progress = progress)
+                    } else {
+                        LinearProgressIndicator(modifier = node.props.toModifier())
+                    }
+                }
+                else -> {
+                    if (progress != null) {
+                        CircularProgressIndicator(modifier = node.props.toModifier(), progress = progress)
+                    } else {
+                        CircularProgressIndicator(modifier = node.props.toModifier())
+                    }
                 }
             }
         },
@@ -279,6 +345,19 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             LazyColumn(
                 modifier = node.props.toModifier(),
                 verticalArrangement = Arrangement.spacedBy(spacing),
+                reverseLayout = reverse
+            ) {
+                items(node.children) { child ->
+                    renderChild(child)
+                }
+            }
+        },
+        "listRow" to { node, state, onEvent, renderChild ->
+            val spacing = node.props.spacingDp() ?: 0.dp
+            val reverse = node.props.bool("reverse") ?: false
+            LazyRow(
+                modifier = node.props.toModifier(),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
                 reverseLayout = reverse
             ) {
                 items(node.children) { child ->

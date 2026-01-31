@@ -70,6 +70,11 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = true
         ),
         A2UiComponentSpec(
+            type = "listRow",
+            optionalProps = commonLayoutProps + setOf("reverse"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
             type = "listItem",
             optionalProps = commonLayoutProps + setOf("spacing", "verticalAlignment"),
             allowChildren = true
@@ -93,6 +98,21 @@ fun defaultA2UiSchema(): A2UiSchema {
         A2UiComponentSpec(
             type = "button",
             optionalProps = commonLayoutProps + setOf("label", "enabled", "variant"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "iconButton",
+            optionalProps = commonLayoutProps + setOf("name", "enabled", "color", "contentDescription"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "chip",
+            optionalProps = commonLayoutProps + setOf("label", "enabled", "icon"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "progress",
+            optionalProps = commonLayoutProps + setOf("variant", "value"),
             allowChildren = false
         ),
         A2UiComponentSpec(
