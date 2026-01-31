@@ -23,12 +23,15 @@ At a high level:
 ## Built-in components (current)
 - Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`, `list`, `listRow`, `listItem`
 - Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `switch`, `slider`, `chip`, `progress`
+- Navigation: `topAppBar`, `navigationBar`, `navItem`, `tabs`, `tab`
 - Text: `text`
 - Media: `image`, `icon`
 
 ## Common style props (selected)
 - Layout: `padding`, `spacing`, `fill`, `width`, `height`, `size`, `reverse`
 - Buttons: `variant` (filled|outlined|text)
+- Tabs: `selectedIndex`
+- Navigation: `navIcon`, `selected`
 - Progress: `variant` (circular|linear), `value`
 - Shape: `cornerRadius`, `borderWidth`, `borderColor`
 - Surface: `elevation`

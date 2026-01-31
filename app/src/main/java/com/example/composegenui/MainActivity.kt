@@ -62,6 +62,23 @@ private const val SAMPLE_DOC_JSON = """
     "props": { "padding": 24, "spacing": 16 },
     "children": [
       {
+        "type": "topAppBar",
+        "props": { "title": "Compose GenUI", "navIcon": "menu" },
+        "children": [
+          { "type": "iconButton", "props": { "name": "search" } },
+          { "type": "iconButton", "props": { "name": "settings" } }
+        ]
+      },
+      {
+        "type": "tabs",
+        "props": { "selectedIndex": 0 },
+        "children": [
+          { "type": "tab", "props": { "label": "Home" } },
+          { "type": "tab", "props": { "label": "Explore" } },
+          { "type": "tab", "props": { "label": "Profile" } }
+        ]
+      },
+      {
         "type": "text",
         "props": {
           "text": "Compose GenUI (A2UI-aligned)",
@@ -192,6 +209,14 @@ private const val SAMPLE_DOC_JSON = """
         "type": "surface",
         "children": [
           { "type": "text", "props": { "text": "Surface container" } }
+        ]
+      },
+      {
+        "type": "navigationBar",
+        "children": [
+          { "type": "navItem", "props": { "label": "Home", "icon": "favorite", "selected": true } },
+          { "type": "navItem", "props": { "label": "Search", "icon": "search" } },
+          { "type": "navItem", "props": { "label": "Settings", "icon": "settings" } }
         ]
       }
     ]

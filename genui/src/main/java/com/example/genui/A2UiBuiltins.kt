@@ -32,13 +32,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -210,6 +215,69 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                     } else {
                         CircularProgressIndicator(modifier = node.props.toModifier())
                     }
+                }
+            }
+        },
+        "topAppBar" to { node, state, onEvent, renderChild ->
+            val title = node.props.string("title") ?: ""
+            val navIconName = node.props.string("navIcon")
+            TopAppBar(
+                title = { Text(title) },
+                navigationIcon = if (navIconName != null) {
+                    {
+                        val vector = iconByName(navIconName)
+                        if (vector != null) {
+                            IconButton(onClick = {
+                                val id = node.id ?: "topAppBar"
+                                onEvent(A2UiEvent(id, "navClick"))
+                            }) {
+                                Icon(imageVector = vector, contentDescription = null)
+                            }
+                        }
+                    }
+                } else null,
+                actions = {
+                    node.children.forEach(renderChild)
+                }
+            )
+        },
+        "navigationBar" to { node, state, onEvent, renderChild ->
+            NavigationBar(modifier = node.props.toModifier()) {
+                node.children.forEach(renderChild)
+            }
+        },
+        "navItem" to { node, state, onEvent, renderChild ->
+            val label = node.props.string("label") ?: ""
+            val selected = node.props.bool("selected") ?: false
+            val iconName = node.props.string("icon")
+            val iconVector = iconName?.let { iconByName(it) }
+            NavigationBarItem(
+                selected = selected,
+                onClick = {
+                    val id = node.id ?: "navItem"
+                    onEvent(A2UiEvent(id, "select"))
+                },
+                icon = {
+                    if (iconVector != null) {
+                        Icon(imageVector = iconVector, contentDescription = null)
+                    }
+                },
+                label = { Text(label) }
+            )
+        },
+        "tabs" to { node, state, onEvent, renderChild ->
+            val selectedIndex = node.props.int("selectedIndex") ?: 0
+            TabRow(selectedTabIndex = selectedIndex) {
+                node.children.forEachIndexed { index, child ->
+                    val label = child.props.string("label") ?: "Tab"
+                    Tab(
+                        selected = index == selectedIndex,
+                        onClick = {
+                            val id = child.id ?: "tab_$index"
+                            onEvent(A2UiEvent(id, "select"))
+                        },
+                        text = { Text(label) }
+                    )
                 }
             }
         },

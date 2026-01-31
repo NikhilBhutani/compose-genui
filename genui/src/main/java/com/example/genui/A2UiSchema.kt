@@ -116,6 +116,31 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = false
         ),
         A2UiComponentSpec(
+            type = "topAppBar",
+            optionalProps = commonLayoutProps + setOf("title", "navIcon"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "navigationBar",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "navItem",
+            optionalProps = commonLayoutProps + setOf("label", "icon", "selected"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "tabs",
+            optionalProps = commonLayoutProps + setOf("selectedIndex"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "tab",
+            optionalProps = commonLayoutProps + setOf("label"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
             type = "textfield",
             optionalProps = commonLayoutProps + setOf("label", "enabled"),
             allowChildren = false
