@@ -116,6 +116,21 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = false
         ),
         A2UiComponentSpec(
+            type = "snackbar",
+            optionalProps = commonLayoutProps + setOf("text", "actionLabel"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "badge",
+            optionalProps = commonLayoutProps + setOf("label"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "avatar",
+            optionalProps = commonLayoutProps + setOf("url", "icon", "size", "contentDescription"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
             type = "topAppBar",
             optionalProps = commonLayoutProps + setOf("title", "navIcon"),
             allowChildren = true
@@ -157,7 +172,7 @@ fun defaultA2UiSchema(): A2UiSchema {
         ),
         A2UiComponentSpec(
             type = "textfield",
-            optionalProps = commonLayoutProps + setOf("label", "enabled"),
+            optionalProps = commonLayoutProps + setOf("label", "enabled", "variant", "placeholder", "singleLine"),
             allowChildren = false
         ),
         A2UiComponentSpec(

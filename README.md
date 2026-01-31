@@ -25,11 +25,13 @@ At a high level:
 - Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `stepper`, `chip`, `progress`
 - Navigation: `topAppBar`, `navigationBar`, `navItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`
 - Text: `text`
-- Media: `image`, `icon`
+- Media: `image`, `icon`, `avatar`
+- Feedback: `snackbar`, `badge`
 
 ## Common style props (selected)
 - Layout: `padding`, `spacing`, `fill`, `width`, `height`, `size`, `reverse`
 - Buttons: `variant` (filled|outlined|text)
+- TextField: `variant` (outlined|filled), `placeholder`, `singleLine`
 - Tabs: `selectedIndex`
 - Navigation: `navIcon`, `selected`
 - Progress: `variant` (circular|linear), `value`
