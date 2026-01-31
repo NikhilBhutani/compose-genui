@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -29,6 +30,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -41,18 +45,21 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.TextUnit
@@ -223,6 +230,67 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 }
             }
         },
+        "snackbar" to { node, state, onEvent, renderChild ->
+            val text = node.props.string("text") ?: ""
+            val actionLabel = node.props.string("actionLabel")
+            Snackbar(
+                modifier = node.props.toModifier(),
+                action = if (actionLabel != null) {
+                    {
+                        TextButton(onClick = {
+                            val id = node.id ?: "snackbar"
+                            onEvent(A2UiEvent(id, "action"))
+                        }) { Text(actionLabel) }
+                    }
+                } else null
+            ) {
+                Text(text)
+            }
+        },
+        "badge" to { node, state, onEvent, renderChild ->
+            val label = node.props.string("label")
+            BadgedBox(
+                badge = {
+                    if (label != null) {
+                        Badge { Text(label) }
+                    } else {
+                        Badge()
+                    }
+                }
+            ) {
+                if (node.children.isNotEmpty()) {
+                    node.children.forEach(renderChild)
+                }
+            }
+        },
+        "avatar" to { node, state, onEvent, renderChild ->
+            val size = node.props.dp("size") ?: 40.dp
+            val url = node.props.string("url")
+            val iconName = node.props.string("icon")
+            val baseModifier = node.props.toModifier().size(size).clip(CircleShape)
+            when {
+                url != null -> AsyncImage(
+                    modifier = baseModifier,
+                    model = url,
+                    contentDescription = node.props.string("contentDescription"),
+                    contentScale = ContentScale.Crop
+                )
+                iconName != null -> {
+                    val vector = iconByName(iconName)
+                    if (vector != null) {
+                        Box(modifier = baseModifier) {
+                            Icon(
+                                imageVector = vector,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(size * 0.6f)
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    }
+                }
+            }
+        },
         "topAppBar" to { node, state, onEvent, renderChild ->
             val title = node.props.string("title") ?: ""
             val navIconName = node.props.string("navIcon")
@@ -339,22 +407,40 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             val id = node.id ?: "input"
             val label = node.props.string("label") ?: ""
             val enabled = node.props.bool("enabled") ?: true
+            val variant = node.props.string("variant") ?: "outlined"
+            val placeholder = node.props.string("placeholder")
+            val singleLine = node.props.bool("singleLine") ?: false
             val current = state.string(id) ?: ""
-            OutlinedTextField(
-                modifier = node.props.toModifier(),
-                value = current,
-                enabled = enabled,
-                onValueChange = { value ->
-                    onEvent(
-                        A2UiEvent(
-                            nodeId = id,
-                            action = "input",
-                            payload = JsonObject(mapOf("value" to JsonPrimitive(value)))
-                        )
+            val onChange: (String) -> Unit = { value ->
+                onEvent(
+                    A2UiEvent(
+                        nodeId = id,
+                        action = "input",
+                        payload = JsonObject(mapOf("value" to JsonPrimitive(value)))
                     )
-                },
-                label = { Text(label) }
-            )
+                )
+            }
+            if (variant == "filled") {
+                TextField(
+                    modifier = node.props.toModifier(),
+                    value = current,
+                    enabled = enabled,
+                    onValueChange = onChange,
+                    singleLine = singleLine,
+                    label = { if (label.isNotEmpty()) Text(label) },
+                    placeholder = { if (placeholder != null) Text(placeholder) }
+                )
+            } else {
+                OutlinedTextField(
+                    modifier = node.props.toModifier(),
+                    value = current,
+                    enabled = enabled,
+                    onValueChange = onChange,
+                    singleLine = singleLine,
+                    label = { if (label.isNotEmpty()) Text(label) },
+                    placeholder = { if (placeholder != null) Text(placeholder) }
+                )
+            }
         },
         "checkbox" to { node, state, onEvent, renderChild ->
             val id = node.id ?: "checkbox"

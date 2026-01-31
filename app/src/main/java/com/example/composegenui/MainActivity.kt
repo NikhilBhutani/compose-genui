@@ -253,6 +253,22 @@ private const val SAMPLE_DOC_JSON = """
         ]
       },
       {
+        "type": "row",
+        "props": { "spacing": 12, "verticalAlignment": "center" },
+        "children": [
+          { "type": "avatar", "props": { "url": "https://i.pravatar.cc/100", "size": 40 } },
+          {
+            "type": "badge",
+            "props": { "label": "3" },
+            "children": [
+              { "type": "icon", "props": { "name": "favorite" } }
+            ]
+          },
+          { "type": "text", "props": { "text": "Notifications" } }
+        ]
+      },
+      { "type": "snackbar", "props": { "text": "Network error", "actionLabel": "Retry" } },
+      {
         "type": "box",
         "props": { "padding": 12, "background": "#1F1F1F", "contentAlignment": "center" },
         "children": [
