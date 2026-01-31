@@ -49,6 +49,18 @@ The sample app renders a simple A2UI document at runtime. See:
 ## A2UI compatibility
 This SDK aims to stay aligned with the A2UI format so agent outputs can be shared across ecosystems. The renderer currently supports a minimal subset of components and properties; the catalog is intentionally strict to keep generated UI safe and predictable.
 
+## Schema validation (experimental)
+You can validate A2UI documents against the built-in schema before rendering:
+
+```kotlin
+val result = validateA2Ui(document, strict = true)
+if (!result.isValid) {
+    // inspect result.issues
+}
+```
+
+`strict = true` will warn on unknown props.
+
 ## Roadmap
 - Expand component catalog and layout/style props.
 - Add A2UI schema validation.
