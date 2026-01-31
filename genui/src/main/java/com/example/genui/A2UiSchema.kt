@@ -166,6 +166,11 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = false
         ),
         A2UiComponentSpec(
+            type = "triStateCheckbox",
+            optionalProps = commonLayoutProps + setOf("state", "enabled"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
             type = "switch",
             optionalProps = commonLayoutProps + setOf("checked", "enabled"),
             allowChildren = false
@@ -173,6 +178,11 @@ fun defaultA2UiSchema(): A2UiSchema {
         A2UiComponentSpec(
             type = "slider",
             optionalProps = commonLayoutProps + setOf("value", "min", "max", "steps", "enabled"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "stepper",
+            optionalProps = commonLayoutProps + setOf("value", "min", "max", "step"),
             allowChildren = false
         ),
         A2UiComponentSpec(

@@ -47,6 +47,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -375,6 +376,37 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 }
             )
         },
+        "triStateCheckbox" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "triState"
+            val enabled = node.props.bool("enabled") ?: true
+            val raw = state.valueOrNull(id)?.jsonPrimitive?.contentOrNull
+                ?: node.props.string("state")
+                ?: "off"
+            val stateValue = when (raw) {
+                "on" -> androidx.compose.ui.state.ToggleableState.On
+                "indeterminate" -> androidx.compose.ui.state.ToggleableState.Indeterminate
+                else -> androidx.compose.ui.state.ToggleableState.Off
+            }
+            TriStateCheckbox(
+                modifier = node.props.toModifier(),
+                state = stateValue,
+                enabled = enabled,
+                onClick = {
+                    val next = when (stateValue) {
+                        androidx.compose.ui.state.ToggleableState.Off -> "on"
+                        androidx.compose.ui.state.ToggleableState.On -> "indeterminate"
+                        androidx.compose.ui.state.ToggleableState.Indeterminate -> "off"
+                    }
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "input",
+                            payload = JsonObject(mapOf("value" to JsonPrimitive(next)))
+                        )
+                    )
+                }
+            )
+        },
         "switch" to { node, state, onEvent, renderChild ->
             val id = node.id ?: "switch"
             val enabled = node.props.bool("enabled") ?: true
@@ -421,6 +453,32 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                     )
                 }
             )
+        },
+        "stepper" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "stepper"
+            val min = node.props.int("min") ?: 0
+            val max = node.props.int("max") ?: 100
+            val step = node.props.int("step") ?: 1
+            val current = state.valueOrNull(id)?.jsonPrimitive?.intOrNull
+                ?: node.props.int("value")
+                ?: min
+            val minusEnabled = current > min
+            val plusEnabled = current < max
+            Row(
+                modifier = node.props.toModifier(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedButton(onClick = {
+                    val next = (current - step).coerceAtLeast(min)
+                    onEvent(A2UiEvent(id, "input", JsonObject(mapOf("value" to JsonPrimitive(next)))))
+                }, enabled = minusEnabled) { Text("-") }
+                Text(text = current.toString())
+                OutlinedButton(onClick = {
+                    val next = (current + step).coerceAtMost(max)
+                    onEvent(A2UiEvent(id, "input", JsonObject(mapOf("value" to JsonPrimitive(next)))))
+                }, enabled = plusEnabled) { Text("+") }
+            }
         },
         "card" to { node, state, onEvent, renderChild ->
             val elevation = node.props.dp("elevation") ?: 0.dp

@@ -141,11 +141,20 @@ private const val SAMPLE_DOC_JSON = """
         ]
       },
       {
+        "type": "row",
+        "props": { "spacing": 12, "verticalAlignment": "center" },
+        "children": [
+          { "type": "triStateCheckbox", "id": "tri", "props": { "state": "indeterminate" } },
+          { "type": "text", "props": { "text": "Tri‑state" } }
+        ]
+      },
+      {
         "type": "column",
         "props": { "spacing": 8 },
         "children": [
           { "type": "text", "props": { "text": "Volume", "fontWeight": "medium" } },
-          { "type": "slider", "id": "volume", "props": { "min": 0, "max": 100, "value": 30 } }
+          { "type": "slider", "id": "volume", "props": { "min": 0, "max": 100, "value": 30 } },
+          { "type": "stepper", "id": "steps", "props": { "min": 0, "max": 10, "step": 1, "value": 3 } }
         ]
       },
       {
