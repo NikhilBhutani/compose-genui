@@ -66,7 +66,12 @@ fun defaultA2UiSchema(): A2UiSchema {
         ),
         A2UiComponentSpec(
             type = "list",
-            optionalProps = commonLayoutProps,
+            optionalProps = commonLayoutProps + setOf("reverse"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "listItem",
+            optionalProps = commonLayoutProps + setOf("spacing", "verticalAlignment"),
             allowChildren = true
         ),
         A2UiComponentSpec(
@@ -87,7 +92,7 @@ fun defaultA2UiSchema(): A2UiSchema {
         ),
         A2UiComponentSpec(
             type = "button",
-            optionalProps = commonLayoutProps + setOf("label", "enabled"),
+            optionalProps = commonLayoutProps + setOf("label", "enabled", "variant"),
             allowChildren = false
         ),
         A2UiComponentSpec(

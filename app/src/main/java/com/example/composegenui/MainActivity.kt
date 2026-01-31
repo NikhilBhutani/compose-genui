@@ -75,7 +75,8 @@ private const val SAMPLE_DOC_JSON = """
         "props": { "spacing": 12, "verticalAlignment": "center" },
         "children": [
           { "type": "textfield", "id": "name", "props": { "label": "Your name", "width": 220 } },
-          { "type": "button", "id": "submit", "props": { "label": "Submit" } }
+          { "type": "button", "id": "submit", "props": { "label": "Submit" } },
+          { "type": "button", "id": "cancel", "props": { "label": "Cancel", "variant": "outlined" } }
         ]
       },
       { "type": "divider" },
@@ -135,9 +136,30 @@ private const val SAMPLE_DOC_JSON = """
         "type": "list",
         "props": { "spacing": 8 },
         "children": [
-          { "type": "text", "props": { "text": "List item A" } },
-          { "type": "text", "props": { "text": "List item B" } },
-          { "type": "text", "props": { "text": "List item C" } }
+          {
+            "type": "listItem",
+            "props": { "spacing": 8, "verticalAlignment": "center" },
+            "children": [
+              { "type": "icon", "props": { "name": "check", "color": "#4CAF50" } },
+              { "type": "text", "props": { "text": "List item A" } }
+            ]
+          },
+          {
+            "type": "listItem",
+            "props": { "spacing": 8, "verticalAlignment": "center" },
+            "children": [
+              { "type": "icon", "props": { "name": "check", "color": "#4CAF50" } },
+              { "type": "text", "props": { "text": "List item B" } }
+            ]
+          },
+          {
+            "type": "listItem",
+            "props": { "spacing": 8, "verticalAlignment": "center" },
+            "children": [
+              { "type": "icon", "props": { "name": "check", "color": "#4CAF50" } },
+              { "type": "text", "props": { "text": "List item C" } }
+            ]
+          }
         ]
       },
       {

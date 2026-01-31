@@ -27,11 +27,13 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -128,15 +130,21 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         "button" to { node, state, onEvent, renderChild ->
             val label = node.props.string("label") ?: "Action"
             val enabled = node.props.bool("enabled") ?: true
-            Button(
-                modifier = node.props.toModifier(),
-                enabled = enabled,
-                onClick = {
-                    val id = node.id ?: "button"
-                    onEvent(A2UiEvent(id, "click"))
+            val variant = node.props.string("variant") ?: "filled"
+            val onClick = {
+                val id = node.id ?: "button"
+                onEvent(A2UiEvent(id, "click"))
+            }
+            when (variant) {
+                "text" -> TextButton(modifier = node.props.toModifier(), enabled = enabled, onClick = onClick) {
+                    Text(text = label)
                 }
-            ) {
-                Text(text = label)
+                "outlined" -> OutlinedButton(modifier = node.props.toModifier(), enabled = enabled, onClick = onClick) {
+                    Text(text = label)
+                }
+                else -> Button(modifier = node.props.toModifier(), enabled = enabled, onClick = onClick) {
+                    Text(text = label)
+                }
             }
         },
         "textfield" to { node, state, onEvent, renderChild ->
@@ -267,13 +275,25 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         },
         "list" to { node, state, onEvent, renderChild ->
             val spacing = node.props.spacingDp() ?: 0.dp
+            val reverse = node.props.bool("reverse") ?: false
             LazyColumn(
                 modifier = node.props.toModifier(),
-                verticalArrangement = Arrangement.spacedBy(spacing)
+                verticalArrangement = Arrangement.spacedBy(spacing),
+                reverseLayout = reverse
             ) {
                 items(node.children) { child ->
                     renderChild(child)
                 }
+            }
+        },
+        "listItem" to { node, state, onEvent, renderChild ->
+            val spacing = node.props.spacingDp() ?: 8.dp
+            Row(
+                modifier = node.props.toModifier(),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
+                verticalAlignment = node.props.vAlignment() ?: Alignment.CenterVertically
+            ) {
+                node.children.forEach(renderChild)
             }
         },
         "spacer" to { node, state, onEvent, renderChild ->
