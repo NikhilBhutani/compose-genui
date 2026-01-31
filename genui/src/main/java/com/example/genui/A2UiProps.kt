@@ -1,8 +1,13 @@
 package com.example.genui
 
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -29,6 +34,9 @@ internal fun JsonObject.array(key: String): JsonArray? =
 
 internal fun JsonObject.dp(key: String): Dp? =
     float(key)?.dp ?: int(key)?.dp
+
+internal fun JsonObject.sp(key: String): TextUnit? =
+    float(key)?.sp ?: int(key)?.sp
 
 internal fun JsonObject.padding(): A2UiPadding? {
     val all = dp("padding")
@@ -75,6 +83,33 @@ internal fun JsonObject.contentAlignment(): Alignment? = when (string("contentAl
     else -> null
 }
 
+internal fun JsonObject.textAlign(): TextAlign? = when (string("textAlign")) {
+    "start" -> TextAlign.Start
+    "center" -> TextAlign.Center
+    "end" -> TextAlign.End
+    "justify" -> TextAlign.Justify
+    else -> null
+}
+
+internal fun JsonObject.fontWeight(): FontWeight? {
+    val raw = string("fontWeight") ?: return null
+    return when (raw) {
+        "thin" -> FontWeight.Thin
+        "extraLight" -> FontWeight.ExtraLight
+        "light" -> FontWeight.Light
+        "normal" -> FontWeight.Normal
+        "medium" -> FontWeight.Medium
+        "semiBold" -> FontWeight.SemiBold
+        "bold" -> FontWeight.Bold
+        "extraBold" -> FontWeight.ExtraBold
+        "black" -> FontWeight.Black
+        else -> raw.toIntOrNull()?.let { FontWeight(it) }
+    }
+}
+
+internal fun JsonObject.color(key: String): Color? =
+    string(key)?.let { parseColor(it) }
+
 internal fun JsonElement.asStringOrNull(): String? =
     (this as? JsonPrimitive)?.contentOrNull
 
@@ -84,3 +119,14 @@ internal data class A2UiPadding(
     val end: Dp,
     val bottom: Dp
 )
+
+internal fun parseColor(value: String): Color? {
+    val trimmed = value.trim()
+    if (!trimmed.startsWith("#")) return null
+    val hex = trimmed.removePrefix("#")
+    return when (hex.length) {
+        6 -> hex.toLongOrNull(16)?.let { Color((0xFF000000 or it).toInt()) }
+        8 -> hex.toLongOrNull(16)?.let { Color(it.toInt()) }
+        else -> null
+    }
+}

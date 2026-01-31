@@ -21,8 +21,8 @@ At a high level:
 4. State updates trigger Compose recomposition.
 
 ## Built-in components (current)
-- Layout: `column`, `row`, `box`, `surface`, `spacer`, `divider`
-- Inputs: `textfield`, `button`
+- Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`
+- Inputs: `textfield`, `button`, `checkbox`, `switch`, `slider`
 - Text: `text`
 
 These live in `defaultA2UiCatalog()` and are intentionally minimal for safety.

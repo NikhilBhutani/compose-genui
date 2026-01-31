@@ -12,7 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.example.genui.A2UiEvent
 import com.example.genui.A2UiJson
 import com.example.genui.A2UiRender
 import com.example.genui.A2UiState
@@ -64,7 +63,7 @@ private const val SAMPLE_DOC_JSON = """
     "children": [
       {
         "type": "text",
-        "props": { "text": "Compose GenUI (A2UI-aligned)" }
+        "props": { "text": "Compose GenUI (A2UI-aligned)", "fontSize": 20, "fontWeight": "bold" }
       },
       {
         "type": "row",
@@ -76,10 +75,42 @@ private const val SAMPLE_DOC_JSON = """
       },
       { "type": "divider" },
       {
+        "type": "card",
+        "props": { "padding": 12 },
+        "children": [
+          { "type": "text", "props": { "text": "Card container", "color": "#0066FF" } },
+          { "type": "spacer", "props": { "height": 8 } },
+          {
+            "type": "row",
+            "props": { "spacing": 12, "verticalAlignment": "center" },
+            "children": [
+              { "type": "checkbox", "id": "optin", "props": { "checked": true } },
+              { "type": "text", "props": { "text": "Enable updates" } }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "row",
+        "props": { "spacing": 16, "verticalAlignment": "center" },
+        "children": [
+          { "type": "text", "props": { "text": "Notifications" } },
+          { "type": "switch", "id": "notify", "props": { "checked": false } }
+        ]
+      },
+      {
+        "type": "column",
+        "props": { "spacing": 8 },
+        "children": [
+          { "type": "text", "props": { "text": "Volume", "fontWeight": "medium" } },
+          { "type": "slider", "id": "volume", "props": { "min": 0, "max": 100, "value": 30 } }
+        ]
+      },
+      {
         "type": "box",
         "props": { "padding": 12, "background": "#1F1F1F", "contentAlignment": "center" },
         "children": [
-          { "type": "text", "props": { "text": "Box + background via modifiers" } }
+          { "type": "text", "props": { "text": "Box + background via modifiers", "color": "#FFFFFF" } }
         ]
       },
       { "type": "spacer", "props": { "height": 8 } },

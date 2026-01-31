@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 
 internal fun JsonObject.toModifier(): Modifier {
     var modifier = Modifier
@@ -48,15 +47,4 @@ internal fun JsonObject.toModifier(): Modifier {
     }
 
     return modifier
-}
-
-private fun parseColor(value: String): Color? {
-    val trimmed = value.trim()
-    if (!trimmed.startsWith("#")) return null
-    val hex = trimmed.removePrefix("#")
-    return when (hex.length) {
-        6 -> hex.toLongOrNull(16)?.let { Color((0xFF000000 or it).toInt()) }
-        8 -> hex.toLongOrNull(16)?.let { Color(it.toInt()) }
-        else -> null
-    }
 }

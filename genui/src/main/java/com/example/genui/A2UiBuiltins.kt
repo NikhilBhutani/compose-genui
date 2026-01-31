@@ -8,16 +8,23 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonPrimitive
 
 fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
     mapOf(
@@ -70,12 +77,27 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         },
         "text" to { node, state, onEvent, renderChild ->
             val text = node.props.string("text") ?: ""
-            Text(text = text, modifier = node.props.toModifier())
+            val color = node.props.color("color") ?: Color.Unspecified
+            val fontSize = node.props.sp("fontSize") ?: TextUnit.Unspecified
+            val fontWeight = node.props.fontWeight()
+            val textAlign = node.props.textAlign()
+            val maxLines = node.props.int("maxLines") ?: Int.MAX_VALUE
+            Text(
+                text = text,
+                modifier = node.props.toModifier(),
+                color = color,
+                fontSize = fontSize,
+                fontWeight = fontWeight,
+                textAlign = textAlign,
+                maxLines = maxLines
+            )
         },
         "button" to { node, state, onEvent, renderChild ->
             val label = node.props.string("label") ?: "Action"
+            val enabled = node.props.bool("enabled") ?: true
             Button(
                 modifier = node.props.toModifier(),
+                enabled = enabled,
                 onClick = {
                     val id = node.id ?: "button"
                     onEvent(A2UiEvent(id, "click"))
@@ -87,10 +109,12 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         "textfield" to { node, state, onEvent, renderChild ->
             val id = node.id ?: "input"
             val label = node.props.string("label") ?: ""
+            val enabled = node.props.bool("enabled") ?: true
             val current = state.string(id) ?: ""
             OutlinedTextField(
                 modifier = node.props.toModifier(),
                 value = current,
+                enabled = enabled,
                 onValueChange = { value ->
                     onEvent(
                         A2UiEvent(
@@ -102,6 +126,79 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 },
                 label = { Text(label) }
             )
+        },
+        "checkbox" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "checkbox"
+            val enabled = node.props.bool("enabled") ?: true
+            val checked = state.valueOrNull(id)?.jsonPrimitive?.booleanOrNull
+                ?: node.props.bool("checked")
+                ?: false
+            Checkbox(
+                modifier = node.props.toModifier(),
+                checked = checked,
+                enabled = enabled,
+                onCheckedChange = { value ->
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "input",
+                            payload = JsonObject(mapOf("value" to JsonPrimitive(value)))
+                        )
+                    )
+                }
+            )
+        },
+        "switch" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "switch"
+            val enabled = node.props.bool("enabled") ?: true
+            val checked = state.valueOrNull(id)?.jsonPrimitive?.booleanOrNull
+                ?: node.props.bool("checked")
+                ?: false
+            Switch(
+                modifier = node.props.toModifier(),
+                checked = checked,
+                enabled = enabled,
+                onCheckedChange = { value ->
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "input",
+                            payload = JsonObject(mapOf("value" to JsonPrimitive(value)))
+                        )
+                    )
+                }
+            )
+        },
+        "slider" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "slider"
+            val enabled = node.props.bool("enabled") ?: true
+            val min = node.props.float("min") ?: 0f
+            val max = node.props.float("max") ?: 1f
+            val steps = node.props.int("steps") ?: 0
+            val current = state.valueOrNull(id)?.jsonPrimitive?.floatOrNull
+                ?: node.props.float("value")
+                ?: min
+            Slider(
+                modifier = node.props.toModifier(),
+                value = current.coerceIn(min, max),
+                enabled = enabled,
+                valueRange = min..max,
+                steps = steps,
+                onValueChange = { value ->
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "input",
+                            payload = JsonObject(mapOf("value" to JsonPrimitive(value)))
+                        )
+                    )
+                }
+            )
+        },
+        "card" to { node, state, onEvent, renderChild ->
+            Card(modifier = node.props.toModifier()) {
+                node.children.forEach(renderChild)
+            }
         },
         "spacer" to { node, state, onEvent, renderChild ->
             val width = node.props.dp("width")
