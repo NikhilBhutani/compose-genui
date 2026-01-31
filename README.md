@@ -20,6 +20,13 @@ At a high level:
 3. The renderer maps A2UI nodes to your registered composables.
 4. State updates trigger Compose recomposition.
 
+## Built-in components (current)
+- Layout: `column`, `row`, `box`, `surface`, `spacer`, `divider`
+- Inputs: `textfield`, `button`
+- Text: `text`
+
+These live in `defaultA2UiCatalog()` and are intentionally minimal for safety.
+
 ## Modules
 - `genui/`: library module (A2UI model, JSON parser, catalog registry, renderer, session loop).
 - `app/`: sample Android app demonstrating A2UI rendering and event handling.

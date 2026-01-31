@@ -62,6 +62,19 @@ internal fun JsonObject.vAlignment(): Alignment.Vertical? = when (string("vertic
     else -> null
 }
 
+internal fun JsonObject.contentAlignment(): Alignment? = when (string("contentAlignment")) {
+    "topStart" -> Alignment.TopStart
+    "topCenter" -> Alignment.TopCenter
+    "topEnd" -> Alignment.TopEnd
+    "centerStart" -> Alignment.CenterStart
+    "center" -> Alignment.Center
+    "centerEnd" -> Alignment.CenterEnd
+    "bottomStart" -> Alignment.BottomStart
+    "bottomCenter" -> Alignment.BottomCenter
+    "bottomEnd" -> Alignment.BottomEnd
+    else -> null
+}
+
 internal fun JsonElement.asStringOrNull(): String? =
     (this as? JsonPrimitive)?.contentOrNull
 
