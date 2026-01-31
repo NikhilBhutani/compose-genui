@@ -39,6 +39,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -402,6 +403,29 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                             nodeId = id,
                             action = "input",
                             payload = JsonObject(mapOf("value" to JsonPrimitive(next)))
+                        )
+                    )
+                }
+            )
+        },
+        "radio" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "radio"
+            val enabled = node.props.bool("enabled") ?: true
+            val value = node.props.string("value") ?: "value"
+            val group = node.props.string("group") ?: "group"
+            val selectedValue = state.valueOrNull(group)?.jsonPrimitive?.contentOrNull
+                ?: node.props.string("selectedValue")
+            val selected = selectedValue == value
+            RadioButton(
+                modifier = node.props.toModifier(),
+                selected = selected,
+                enabled = enabled,
+                onClick = {
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = group,
+                            action = "input",
+                            payload = JsonObject(mapOf("value" to JsonPrimitive(value)))
                         )
                     )
                 }

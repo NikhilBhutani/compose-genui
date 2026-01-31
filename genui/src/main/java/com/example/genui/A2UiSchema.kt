@@ -171,6 +171,11 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = false
         ),
         A2UiComponentSpec(
+            type = "radio",
+            optionalProps = commonLayoutProps + setOf("value", "group", "selectedValue", "enabled"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
             type = "switch",
             optionalProps = commonLayoutProps + setOf("checked", "enabled"),
             allowChildren = false

@@ -22,7 +22,7 @@ At a high level:
 
 ## Built-in components (current)
 - Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`, `list`, `listRow`, `listItem`
-- Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `triStateCheckbox`, `switch`, `slider`, `stepper`, `chip`, `progress`
+- Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `stepper`, `chip`, `progress`
 - Navigation: `topAppBar`, `navigationBar`, `navItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`
 - Text: `text`
 - Media: `image`, `icon`

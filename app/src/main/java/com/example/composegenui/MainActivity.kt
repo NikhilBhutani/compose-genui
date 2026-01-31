@@ -150,6 +150,37 @@ private const val SAMPLE_DOC_JSON = """
       },
       {
         "type": "column",
+        "props": { "spacing": 4 },
+        "children": [
+          { "type": "text", "props": { "text": "Theme" } },
+          {
+            "type": "row",
+            "props": { "spacing": 8, "verticalAlignment": "center" },
+            "children": [
+              { "type": "radio", "props": { "group": "theme", "value": "system", "selectedValue": "system" } },
+              { "type": "text", "props": { "text": "System" } }
+            ]
+          },
+          {
+            "type": "row",
+            "props": { "spacing": 8, "verticalAlignment": "center" },
+            "children": [
+              { "type": "radio", "props": { "group": "theme", "value": "light", "selectedValue": "system" } },
+              { "type": "text", "props": { "text": "Light" } }
+            ]
+          },
+          {
+            "type": "row",
+            "props": { "spacing": 8, "verticalAlignment": "center" },
+            "children": [
+              { "type": "radio", "props": { "group": "theme", "value": "dark", "selectedValue": "system" } },
+              { "type": "text", "props": { "text": "Dark" } }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "column",
         "props": { "spacing": 8 },
         "children": [
           { "type": "text", "props": { "text": "Volume", "fontWeight": "medium" } },
