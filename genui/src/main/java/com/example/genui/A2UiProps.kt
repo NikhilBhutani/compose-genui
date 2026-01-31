@@ -3,6 +3,7 @@ package com.example.genui
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -56,6 +57,10 @@ internal fun JsonObject.padding(): A2UiPadding? {
 }
 
 internal fun JsonObject.spacingDp(): Dp? = dp("spacing")
+
+internal fun JsonObject.cornerRadius(): Dp? = dp("cornerRadius")
+
+internal fun JsonObject.borderWidth(): Dp? = dp("borderWidth")
 
 internal fun JsonObject.hAlignment(): Alignment.Horizontal? = when (string("horizontalAlignment")) {
     "start" -> Alignment.Start
@@ -117,6 +122,16 @@ internal fun JsonObject.fontWeight(): FontWeight? {
         else -> raw.toIntOrNull()?.let { FontWeight(it) }
     }
 }
+
+internal fun JsonObject.fontStyle(): FontStyle? = when (string("fontStyle")) {
+    "italic" -> FontStyle.Italic
+    "normal" -> FontStyle.Normal
+    else -> null
+}
+
+internal fun JsonObject.lineHeight(): TextUnit? = sp("lineHeight")
+
+internal fun JsonObject.letterSpacing(): TextUnit? = sp("letterSpacing")
 
 internal fun JsonObject.color(key: String): Color? =
     string(key)?.let { parseColor(it) }

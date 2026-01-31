@@ -22,9 +22,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -38,6 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import coil.compose.AsyncImage
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -85,7 +88,14 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             }
         },
         "surface" to { node, state, onEvent, renderChild ->
-            Surface(modifier = node.props.toModifier()) {
+            val elevation = node.props.dp("elevation") ?: 0.dp
+            val radius = node.props.cornerRadius()
+            val shape = radius?.let { RoundedCornerShape(it) } ?: MaterialTheme.shapes.medium
+            Surface(
+                modifier = node.props.toModifier(),
+                tonalElevation = elevation,
+                shape = shape
+            ) {
                 node.children.forEach(renderChild)
             }
         },
@@ -97,7 +107,10 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             val color = node.props.color("color") ?: Color.Unspecified
             val fontSize = node.props.sp("fontSize") ?: TextUnit.Unspecified
             val fontWeight = node.props.fontWeight()
+            val fontStyle = node.props.fontStyle()
             val textAlign = node.props.textAlign()
+            val lineHeight = node.props.lineHeight() ?: TextUnit.Unspecified
+            val letterSpacing = node.props.letterSpacing() ?: TextUnit.Unspecified
             val maxLines = node.props.int("maxLines") ?: Int.MAX_VALUE
             Text(
                 text = text,
@@ -105,7 +118,10 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 color = color,
                 fontSize = fontSize,
                 fontWeight = fontWeight,
+                fontStyle = fontStyle,
                 textAlign = textAlign,
+                lineHeight = lineHeight,
+                letterSpacing = letterSpacing,
                 maxLines = maxLines
             )
         },
@@ -213,7 +229,14 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             )
         },
         "card" to { node, state, onEvent, renderChild ->
-            Card(modifier = node.props.toModifier()) {
+            val elevation = node.props.dp("elevation") ?: 0.dp
+            val radius = node.props.cornerRadius()
+            val shape = radius?.let { RoundedCornerShape(it) } ?: MaterialTheme.shapes.medium
+            Card(
+                modifier = node.props.toModifier(),
+                shape = shape,
+                elevation = CardDefaults.cardElevation(defaultElevation = elevation)
+            ) {
                 node.children.forEach(renderChild)
             }
         },

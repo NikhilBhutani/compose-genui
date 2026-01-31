@@ -63,7 +63,12 @@ private const val SAMPLE_DOC_JSON = """
     "children": [
       {
         "type": "text",
-        "props": { "text": "Compose GenUI (A2UI-aligned)", "fontSize": 20, "fontWeight": "bold" }
+        "props": {
+          "text": "Compose GenUI (A2UI-aligned)",
+          "fontSize": 20,
+          "fontWeight": "bold",
+          "letterSpacing": 0.5
+        }
       },
       {
         "type": "row",
@@ -76,9 +81,12 @@ private const val SAMPLE_DOC_JSON = """
       { "type": "divider" },
       {
         "type": "card",
-        "props": { "padding": 12 },
+        "props": { "padding": 12, "cornerRadius": 12, "borderWidth": 1, "borderColor": "#E0E0E0" },
         "children": [
-          { "type": "text", "props": { "text": "Card container", "color": "#0066FF" } },
+          {
+            "type": "text",
+            "props": { "text": "Card container", "color": "#0066FF", "fontStyle": "italic" }
+          },
           { "type": "spacer", "props": { "height": 8 } },
           {
             "type": "row",

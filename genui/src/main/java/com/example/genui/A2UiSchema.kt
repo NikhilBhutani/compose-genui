@@ -22,13 +22,19 @@ fun defaultA2UiSchema(): A2UiSchema {
         "background",
         "horizontalAlignment",
         "verticalAlignment",
-        "contentAlignment"
+        "contentAlignment",
+        "cornerRadius",
+        "borderWidth",
+        "borderColor"
     )
     val textStyleProps = setOf(
         "color",
         "fontSize",
         "fontWeight",
+        "fontStyle",
         "textAlign",
+        "lineHeight",
+        "letterSpacing",
         "maxLines"
     )
 
@@ -50,12 +56,12 @@ fun defaultA2UiSchema(): A2UiSchema {
         ),
         A2UiComponentSpec(
             type = "surface",
-            optionalProps = commonLayoutProps,
+            optionalProps = commonLayoutProps + setOf("elevation"),
             allowChildren = true
         ),
         A2UiComponentSpec(
             type = "card",
-            optionalProps = commonLayoutProps,
+            optionalProps = commonLayoutProps + setOf("elevation"),
             allowChildren = true
         ),
         A2UiComponentSpec(

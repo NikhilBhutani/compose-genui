@@ -26,6 +26,12 @@ At a high level:
 - Text: `text`
 - Media: `image`, `icon`
 
+## Common style props (selected)
+- Layout: `padding`, `spacing`, `fill`, `width`, `height`, `size`
+- Shape: `cornerRadius`, `borderWidth`, `borderColor`
+- Surface: `elevation`
+- Text: `fontSize`, `fontWeight`, `fontStyle`, `textAlign`, `lineHeight`, `letterSpacing`, `color`
+
 These live in `defaultA2UiCatalog()` and are intentionally minimal for safety.
 
 ## Modules
