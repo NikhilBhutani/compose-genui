@@ -141,6 +141,21 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = false
         ),
         A2UiComponentSpec(
+            type = "menu",
+            optionalProps = commonLayoutProps + setOf("expanded"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "menuItem",
+            optionalProps = commonLayoutProps + setOf("label"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "dialog",
+            optionalProps = commonLayoutProps + setOf("title", "text", "confirmLabel", "dismissLabel"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
             type = "textfield",
             optionalProps = commonLayoutProps + setOf("label", "enabled"),
             allowChildren = false

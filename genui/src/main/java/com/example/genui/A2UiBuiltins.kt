@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -28,6 +29,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -280,6 +283,55 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                     )
                 }
             }
+        },
+        "menu" to { node, state, onEvent, renderChild ->
+            val expanded = node.props.bool("expanded") ?: false
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = {
+                    val id = node.id ?: "menu"
+                    onEvent(A2UiEvent(id, "dismiss"))
+                },
+                modifier = node.props.toModifier()
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        "menuItem" to { node, state, onEvent, renderChild ->
+            val label = node.props.string("label") ?: "Item"
+            DropdownMenuItem(
+                text = { Text(label) },
+                onClick = {
+                    val id = node.id ?: "menuItem"
+                    onEvent(A2UiEvent(id, "select"))
+                }
+            )
+        },
+        "dialog" to { node, state, onEvent, renderChild ->
+            val title = node.props.string("title")
+            val text = node.props.string("text")
+            val confirm = node.props.string("confirmLabel") ?: "OK"
+            val dismiss = node.props.string("dismissLabel")
+            AlertDialog(
+                onDismissRequest = {
+                    val id = node.id ?: "dialog"
+                    onEvent(A2UiEvent(id, "dismiss"))
+                },
+                title = if (title != null) ({ Text(title) }) else null,
+                text = if (text != null) ({ Text(text) }) else null,
+                confirmButton = {
+                    TextButton(onClick = {
+                        val id = node.id ?: "dialog"
+                        onEvent(A2UiEvent(id, "confirm"))
+                    }) { Text(confirm) }
+                },
+                dismissButton = if (dismiss != null) ({
+                    TextButton(onClick = {
+                        val id = node.id ?: "dialog"
+                        onEvent(A2UiEvent(id, "dismiss"))
+                    }) { Text(dismiss) }
+                }) else null
+            )
         },
         "textfield" to { node, state, onEvent, renderChild ->
             val id = node.id ?: "input"

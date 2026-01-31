@@ -79,6 +79,21 @@ private const val SAMPLE_DOC_JSON = """
         ]
       },
       {
+        "type": "row",
+        "props": { "spacing": 8, "verticalAlignment": "center" },
+        "children": [
+          { "type": "button", "props": { "label": "Open menu" } },
+          { "type": "menu", "props": { "expanded": false }, "children": [
+            { "type": "menuItem", "props": { "label": "Item 1" } },
+            { "type": "menuItem", "props": { "label": "Item 2" } }
+          ]}
+        ]
+      },
+      {
+        "type": "dialog",
+        "props": { "title": "Hello", "text": "Dialogs via A2UI", "confirmLabel": "Ok", "dismissLabel": "Cancel" }
+      },
+      {
         "type": "text",
         "props": {
           "text": "Compose GenUI (A2UI-aligned)",
