@@ -7,21 +7,38 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
@@ -200,6 +217,42 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 node.children.forEach(renderChild)
             }
         },
+        "image" to { node, state, onEvent, renderChild ->
+            val url = node.props.string("url")
+            if (url != null) {
+                val scale = node.props.contentScale() ?: ContentScale.Fit
+                AsyncImage(
+                    modifier = node.props.toModifier(),
+                    model = url,
+                    contentDescription = node.props.string("contentDescription"),
+                    contentScale = scale
+                )
+            }
+        },
+        "icon" to { node, state, onEvent, renderChild ->
+            val name = node.props.string("name") ?: "info"
+            val vector = iconByName(name)
+            if (vector != null) {
+                val tint = node.props.color("color") ?: Color.Unspecified
+                Icon(
+                    modifier = node.props.toModifier(),
+                    imageVector = vector,
+                    contentDescription = node.props.string("contentDescription"),
+                    tint = tint
+                )
+            }
+        },
+        "list" to { node, state, onEvent, renderChild ->
+            val spacing = node.props.spacingDp() ?: 0.dp
+            LazyColumn(
+                modifier = node.props.toModifier(),
+                verticalArrangement = Arrangement.spacedBy(spacing)
+            ) {
+                items(node.children) { child ->
+                    renderChild(child)
+                }
+            }
+        },
         "spacer" to { node, state, onEvent, renderChild ->
             val width = node.props.dp("width")
             val height = node.props.dp("height")
@@ -212,3 +265,17 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         }
     )
 )
+
+private fun iconByName(name: String): ImageVector? = when (name) {
+    "add" -> Icons.Filled.Add
+    "back" -> Icons.Filled.ArrowBack
+    "check" -> Icons.Filled.Check
+    "close" -> Icons.Filled.Close
+    "edit" -> Icons.Filled.Edit
+    "favorite" -> Icons.Filled.Favorite
+    "info" -> Icons.Filled.Info
+    "menu" -> Icons.Filled.Menu
+    "search" -> Icons.Filled.Search
+    "settings" -> Icons.Filled.Settings
+    else -> null
+}

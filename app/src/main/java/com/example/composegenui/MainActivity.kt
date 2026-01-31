@@ -107,6 +107,32 @@ private const val SAMPLE_DOC_JSON = """
         ]
       },
       {
+        "type": "row",
+        "props": { "spacing": 12, "verticalAlignment": "center" },
+        "children": [
+          { "type": "icon", "props": { "name": "favorite", "color": "#E91E63" } },
+          { "type": "text", "props": { "text": "Featured" } }
+        ]
+      },
+      {
+        "type": "image",
+        "props": {
+          "url": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
+          "height": 160,
+          "fill": "width",
+          "contentScale": "crop"
+        }
+      },
+      {
+        "type": "list",
+        "props": { "spacing": 8 },
+        "children": [
+          { "type": "text", "props": { "text": "List item A" } },
+          { "type": "text", "props": { "text": "List item B" } },
+          { "type": "text", "props": { "text": "List item C" } }
+        ]
+      },
+      {
         "type": "box",
         "props": { "padding": 12, "background": "#1F1F1F", "contentAlignment": "center" },
         "children": [

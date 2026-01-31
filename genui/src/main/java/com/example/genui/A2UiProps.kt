@@ -2,6 +2,7 @@ package com.example.genui
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -88,6 +89,16 @@ internal fun JsonObject.textAlign(): TextAlign? = when (string("textAlign")) {
     "center" -> TextAlign.Center
     "end" -> TextAlign.End
     "justify" -> TextAlign.Justify
+    else -> null
+}
+
+internal fun JsonObject.contentScale(): ContentScale? = when (string("contentScale")) {
+    "fit" -> ContentScale.Fit
+    "crop" -> ContentScale.Crop
+    "fillBounds" -> ContentScale.FillBounds
+    "fillWidth" -> ContentScale.FillWidth
+    "fillHeight" -> ContentScale.FillHeight
+    "inside" -> ContentScale.Inside
     else -> null
 }
 
