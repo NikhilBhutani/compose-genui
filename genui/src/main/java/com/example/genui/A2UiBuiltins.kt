@@ -1,10 +1,15 @@
 package com.example.genui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -12,6 +17,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
@@ -61,31 +71,54 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DockedSearchBar
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.LargeFloatingActionButton
+import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -93,11 +126,22 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.rememberTimePickerState
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -922,6 +966,475 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         },
         "segment" to { node, state, onEvent, renderChild ->
             // Placeholder for segment children - rendering handled by segmentedButton parent
+        },
+        // Card variants
+        "elevatedCard" to { node, state, onEvent, renderChild ->
+            val elevation = node.props.dp("elevation") ?: 1.dp
+            val radius = node.props.cornerRadius()
+            val shape = radius?.let { RoundedCornerShape(it) } ?: MaterialTheme.shapes.medium
+            ElevatedCard(
+                modifier = node.props.toModifier(),
+                shape = shape,
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = elevation)
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        "outlinedCard" to { node, state, onEvent, renderChild ->
+            val radius = node.props.cornerRadius()
+            val shape = radius?.let { RoundedCornerShape(it) } ?: MaterialTheme.shapes.medium
+            OutlinedCard(
+                modifier = node.props.toModifier(),
+                shape = shape
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        // Button variants
+        "elevatedButton" to { node, state, onEvent, renderChild ->
+            val label = node.props.string("label") ?: "Action"
+            val enabled = node.props.bool("enabled") ?: true
+            ElevatedButton(
+                modifier = node.props.toModifier(),
+                enabled = enabled,
+                onClick = {
+                    val id = node.id ?: "elevatedButton"
+                    onEvent(A2UiEvent(id, "click"))
+                }
+            ) { Text(label) }
+        },
+        "tonalButton" to { node, state, onEvent, renderChild ->
+            val label = node.props.string("label") ?: "Action"
+            val enabled = node.props.bool("enabled") ?: true
+            FilledTonalButton(
+                modifier = node.props.toModifier(),
+                enabled = enabled,
+                onClick = {
+                    val id = node.id ?: "tonalButton"
+                    onEvent(A2UiEvent(id, "click"))
+                }
+            ) { Text(label) }
+        },
+        // Chip variants
+        "inputChip" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "inputChip"
+            val label = node.props.string("label") ?: "Input"
+            val selected = node.props.bool("selected") ?: false
+            val iconName = node.props.string("icon")
+            val iconVector = iconName?.let { iconByName(it) }
+            InputChip(
+                modifier = node.props.toModifier(),
+                selected = selected,
+                onClick = { onEvent(A2UiEvent(id, "click")) },
+                label = { Text(label) },
+                leadingIcon = if (iconVector != null) {
+                    { Icon(imageVector = iconVector, contentDescription = null) }
+                } else null,
+                trailingIcon = {
+                    IconButton(onClick = { onEvent(A2UiEvent(id, "dismiss")) }) {
+                        Icon(Icons.Filled.Close, contentDescription = "Remove")
+                    }
+                }
+            )
+        },
+        "suggestionChip" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "suggestionChip"
+            val label = node.props.string("label") ?: "Suggestion"
+            val iconName = node.props.string("icon")
+            val iconVector = iconName?.let { iconByName(it) }
+            SuggestionChip(
+                modifier = node.props.toModifier(),
+                onClick = { onEvent(A2UiEvent(id, "click")) },
+                label = { Text(label) },
+                icon = if (iconVector != null) {
+                    { Icon(imageVector = iconVector, contentDescription = null) }
+                } else null
+            )
+        },
+        // Material 3 ListItem
+        "listItemM3" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "listItem"
+            val headline = node.props.string("headline") ?: ""
+            val supporting = node.props.string("supporting")
+            val overline = node.props.string("overline")
+            val leadingIcon = node.props.string("leadingIcon")
+            val trailingIcon = node.props.string("trailingIcon")
+            val leadingVector = leadingIcon?.let { iconByName(it) }
+            val trailingVector = trailingIcon?.let { iconByName(it) }
+            ListItem(
+                modifier = node.props.toModifier().clickable { onEvent(A2UiEvent(id, "click")) },
+                headlineContent = { Text(headline) },
+                supportingContent = if (supporting != null) {{ Text(supporting) }} else null,
+                overlineContent = if (overline != null) {{ Text(overline) }} else null,
+                leadingContent = if (leadingVector != null) {{ Icon(leadingVector, contentDescription = null) }} else null,
+                trailingContent = if (trailingVector != null) {{ Icon(trailingVector, contentDescription = null) }} else null
+            )
+        },
+        // Navigation Rail (for tablets/desktop)
+        "navigationRail" to { node, state, onEvent, renderChild ->
+            NavigationRail(modifier = node.props.toModifier()) {
+                node.children.forEach(renderChild)
+            }
+        },
+        "railItem" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "railItem"
+            val label = node.props.string("label") ?: ""
+            val selected = node.props.bool("selected") ?: false
+            val iconName = node.props.string("icon")
+            val iconVector = iconName?.let { iconByName(it) }
+            NavigationRailItem(
+                selected = selected,
+                onClick = { onEvent(A2UiEvent(id, "select")) },
+                icon = {
+                    if (iconVector != null) {
+                        Icon(imageVector = iconVector, contentDescription = null)
+                    }
+                },
+                label = if (label.isNotEmpty()) {{ Text(label) }} else null
+            )
+        },
+        // Navigation Drawer
+        "navigationDrawer" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "drawer"
+            val open = node.props.bool("open") ?: false
+            val drawerState = rememberDrawerState(if (open) DrawerValue.Open else DrawerValue.Closed)
+            val drawerContent = node.children.filter { it.type == "drawerItem" || it.type == "drawerSection" }
+            val mainContent = node.children.filter { it.type != "drawerItem" && it.type != "drawerSection" }
+            ModalNavigationDrawer(
+                modifier = node.props.toModifier(),
+                drawerState = drawerState,
+                drawerContent = {
+                    ModalDrawerSheet {
+                        drawerContent.forEach(renderChild)
+                    }
+                }
+            ) {
+                mainContent.forEach(renderChild)
+            }
+        },
+        "drawerItem" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "drawerItem"
+            val label = node.props.string("label") ?: ""
+            val selected = node.props.bool("selected") ?: false
+            val iconName = node.props.string("icon")
+            val iconVector = iconName?.let { iconByName(it) }
+            NavigationDrawerItem(
+                modifier = node.props.toModifier(),
+                label = { Text(label) },
+                selected = selected,
+                onClick = { onEvent(A2UiEvent(id, "select")) },
+                icon = if (iconVector != null) {{ Icon(iconVector, contentDescription = null) }} else null
+            )
+        },
+        // TopAppBar variants
+        "centerTopAppBar" to @Composable { node, state, onEvent, renderChild ->
+            val title = node.props.string("title") ?: ""
+            val navIconName = node.props.string("navIcon")
+            CenterAlignedTopAppBar(
+                title = { Text(title) },
+                navigationIcon = if (navIconName != null) {
+                    {
+                        val vector = iconByName(navIconName)
+                        if (vector != null) {
+                            IconButton(onClick = {
+                                val id = node.id ?: "centerTopAppBar"
+                                onEvent(A2UiEvent(id, "navClick"))
+                            }) {
+                                Icon(imageVector = vector, contentDescription = null)
+                            }
+                        }
+                    }
+                } else ({}),
+                actions = { node.children.forEach(renderChild) }
+            )
+        },
+        "mediumTopAppBar" to @Composable { node, state, onEvent, renderChild ->
+            val title = node.props.string("title") ?: ""
+            val navIconName = node.props.string("navIcon")
+            MediumTopAppBar(
+                title = { Text(title) },
+                navigationIcon = if (navIconName != null) {
+                    {
+                        val vector = iconByName(navIconName)
+                        if (vector != null) {
+                            IconButton(onClick = {
+                                val id = node.id ?: "mediumTopAppBar"
+                                onEvent(A2UiEvent(id, "navClick"))
+                            }) {
+                                Icon(imageVector = vector, contentDescription = null)
+                            }
+                        }
+                    }
+                } else ({}),
+                actions = { node.children.forEach(renderChild) }
+            )
+        },
+        "largeTopAppBar" to @Composable { node, state, onEvent, renderChild ->
+            val title = node.props.string("title") ?: ""
+            val navIconName = node.props.string("navIcon")
+            LargeTopAppBar(
+                title = { Text(title) },
+                navigationIcon = if (navIconName != null) {
+                    {
+                        val vector = iconByName(navIconName)
+                        if (vector != null) {
+                            IconButton(onClick = {
+                                val id = node.id ?: "largeTopAppBar"
+                                onEvent(A2UiEvent(id, "navClick"))
+                            }) {
+                                Icon(imageVector = vector, contentDescription = null)
+                            }
+                        }
+                    }
+                } else ({}),
+                actions = { node.children.forEach(renderChild) }
+            )
+        },
+        // Bottom App Bar
+        "bottomAppBar" to { node, state, onEvent, renderChild ->
+            BottomAppBar(
+                modifier = node.props.toModifier(),
+                actions = {
+                    node.children.filter { it.type != "fab" }.forEach(renderChild)
+                },
+                floatingActionButton = {
+                    val fabNode = node.children.find { it.type == "fab" }
+                    if (fabNode != null) {
+                        renderChild(fabNode)
+                    }
+                }
+            )
+        },
+        // Tooltip
+        "tooltip" to @Composable { node, state, onEvent, renderChild ->
+            val text = node.props.string("text") ?: ""
+            val tooltipState = rememberTooltipState()
+            TooltipBox(
+                modifier = node.props.toModifier(),
+                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                tooltip = { PlainTooltip { Text(text) } },
+                state = tooltipState
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        "richTooltip" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "richTooltip"
+            val title = node.props.string("title")
+            val text = node.props.string("text") ?: ""
+            val actionLabel = node.props.string("actionLabel")
+            val tooltipState = rememberTooltipState(isPersistent = true)
+            TooltipBox(
+                modifier = node.props.toModifier(),
+                positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+                tooltip = {
+                    RichTooltip(
+                        title = if (title != null) {{ Text(title) }} else null,
+                        action = if (actionLabel != null) {{
+                            TextButton(onClick = { onEvent(A2UiEvent(id, "action")) }) { Text(actionLabel) }
+                        }} else null
+                    ) { Text(text) }
+                },
+                state = tooltipState
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        // Dropdown / Select
+        "dropdown" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "dropdown"
+            val label = node.props.string("label") ?: ""
+            val expanded = node.props.bool("expanded") ?: false
+            val selectedValue = state.string(id) ?: node.props.string("value") ?: ""
+            ExposedDropdownMenuBox(
+                modifier = node.props.toModifier(),
+                expanded = expanded,
+                onExpandedChange = { isExpanded ->
+                    onEvent(A2UiEvent(id, "expandedChange", JsonObject(mapOf("expanded" to JsonPrimitive(isExpanded)))))
+                }
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    value = selectedValue,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(label) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) }
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { onEvent(A2UiEvent(id, "dismiss")) }
+                ) {
+                    node.children.forEach { child ->
+                        val optionLabel = child.props.string("label") ?: ""
+                        val optionValue = child.props.string("value") ?: optionLabel
+                        DropdownMenuItem(
+                            text = { Text(optionLabel) },
+                            onClick = {
+                                onEvent(A2UiEvent(id, "select", JsonObject(mapOf("value" to JsonPrimitive(optionValue)))))
+                            }
+                        )
+                    }
+                }
+            }
+        },
+        "option" to { node, state, onEvent, renderChild ->
+            // Placeholder - rendering handled by dropdown parent
+        },
+        // Pager / Carousel
+        "horizontalPager" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "hPager"
+            val pageCount = node.children.size
+            val initialPage = node.props.int("initialPage") ?: 0
+            val pagerState = rememberPagerState(initialPage = initialPage) { pageCount }
+            HorizontalPager(
+                modifier = node.props.toModifier(),
+                state = pagerState
+            ) { page ->
+                if (page < node.children.size) {
+                    renderChild(node.children[page])
+                }
+            }
+        },
+        "verticalPager" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "vPager"
+            val pageCount = node.children.size
+            val initialPage = node.props.int("initialPage") ?: 0
+            val pagerState = rememberPagerState(initialPage = initialPage) { pageCount }
+            VerticalPager(
+                modifier = node.props.toModifier(),
+                state = pagerState
+            ) { page ->
+                if (page < node.children.size) {
+                    renderChild(node.children[page])
+                }
+            }
+        },
+        "page" to { node, state, onEvent, renderChild ->
+            Box(modifier = node.props.toModifier()) {
+                node.children.forEach(renderChild)
+            }
+        },
+        // Banner (informational)
+        "banner" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "banner"
+            val text = node.props.string("text") ?: ""
+            val actionLabel = node.props.string("actionLabel")
+            val dismissLabel = node.props.string("dismissLabel")
+            val iconName = node.props.string("icon")
+            val iconVector = iconName?.let { iconByName(it) }
+            Surface(
+                modifier = node.props.toModifier().fillMaxWidth(),
+                tonalElevation = 1.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (iconVector != null) {
+                        Icon(iconVector, contentDescription = null)
+                    }
+                    Text(text, modifier = Modifier.weight(1f))
+                    if (dismissLabel != null) {
+                        TextButton(onClick = { onEvent(A2UiEvent(id, "dismiss")) }) {
+                            Text(dismissLabel)
+                        }
+                    }
+                    if (actionLabel != null) {
+                        TextButton(onClick = { onEvent(A2UiEvent(id, "action")) }) {
+                            Text(actionLabel)
+                        }
+                    }
+                }
+            }
+        },
+        // Scrollable containers
+        "scrollColumn" to { node, state, onEvent, renderChild ->
+            val scrollState = rememberScrollState()
+            Column(
+                modifier = node.props.toModifier().verticalScroll(scrollState),
+                verticalArrangement = node.props.spacingDp()?.let { Arrangement.spacedBy(it) } ?: Arrangement.Top
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        "scrollRow" to { node, state, onEvent, renderChild ->
+            val scrollState = rememberScrollState()
+            Row(
+                modifier = node.props.toModifier().horizontalScroll(scrollState),
+                horizontalArrangement = node.props.spacingDp()?.let { Arrangement.spacedBy(it) } ?: Arrangement.Start
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        // Date/Time Pickers (dialog-based)
+        "datePicker" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "datePicker"
+            val visible = node.props.bool("visible") ?: true
+            val datePickerState = rememberDatePickerState()
+            if (visible) {
+                DatePickerDialog(
+                    onDismissRequest = { onEvent(A2UiEvent(id, "dismiss")) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            val selectedMs = datePickerState.selectedDateMillis
+                            onEvent(A2UiEvent(id, "confirm", JsonObject(mapOf("dateMs" to JsonPrimitive(selectedMs ?: 0L)))))
+                        }) { Text("OK") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { onEvent(A2UiEvent(id, "dismiss")) }) { Text("Cancel") }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
+        },
+        "timePicker" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "timePicker"
+            val initialHour = node.props.int("hour") ?: 12
+            val initialMinute = node.props.int("minute") ?: 0
+            val is24Hour = node.props.bool("is24Hour") ?: false
+            val timePickerState = rememberTimePickerState(initialHour = initialHour, initialMinute = initialMinute, is24Hour = is24Hour)
+            Column(modifier = node.props.toModifier()) {
+                TimePicker(state = timePickerState)
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                    TextButton(onClick = { onEvent(A2UiEvent(id, "dismiss")) }) { Text("Cancel") }
+                    TextButton(onClick = {
+                        onEvent(A2UiEvent(id, "confirm", JsonObject(mapOf(
+                            "hour" to JsonPrimitive(timePickerState.hour),
+                            "minute" to JsonPrimitive(timePickerState.minute)
+                        ))))
+                    }) { Text("OK") }
+                }
+            }
+        },
+        // Swipe to dismiss
+        "swipeToDismiss" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "swipe"
+            val dismissState = rememberSwipeToDismissBoxState(
+                confirmValueChange = { value ->
+                    if (value != SwipeToDismissBoxValue.Settled) {
+                        val direction = when (value) {
+                            SwipeToDismissBoxValue.StartToEnd -> "start"
+                            SwipeToDismissBoxValue.EndToStart -> "end"
+                            else -> "none"
+                        }
+                        onEvent(A2UiEvent(id, "dismiss", JsonObject(mapOf("direction" to JsonPrimitive(direction)))))
+                    }
+                    true
+                }
+            )
+            SwipeToDismissBox(
+                modifier = node.props.toModifier(),
+                state = dismissState,
+                backgroundContent = {
+                    val bgColor = node.props.color("dismissBackground") ?: MaterialTheme.colorScheme.errorContainer
+                    Box(modifier = Modifier.fillMaxWidth().background(bgColor))
+                }
+            ) {
+                node.children.forEach(renderChild)
+            }
         }
     )
 )
