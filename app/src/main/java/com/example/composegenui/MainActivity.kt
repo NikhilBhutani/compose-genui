@@ -3,6 +3,8 @@ package com.example.composegenui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,13 +12,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.genui.A2UiContentGenerator
+import com.example.genui.A2UiDocument
+import com.example.genui.A2UiEvent
 import com.example.genui.A2UiJson
 import com.example.genui.A2UiRender
+import com.example.genui.A2UiSession
 import com.example.genui.A2UiState
+import com.example.genui.A2UiSurface
+import com.example.genui.A2UiUserAction
 import com.example.genui.defaultA2UiCatalog
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +47,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun ComponentCatalogApp() {
     var selectedCategory by remember { mutableIntStateOf(0) }
-    val categories = listOf("Layout", "Input", "Navigation", "Feedback", "Media")
+    val categories = listOf("Layout", "Input", "Navigation", "Feedback", "Media", "Chat")
 
     Scaffold(
         topBar = {
@@ -59,7 +71,8 @@ private fun ComponentCatalogApp() {
                                     1 -> Icons.Default.TouchApp
                                     2 -> Icons.Default.Navigation
                                     3 -> Icons.Default.Feedback
-                                    else -> Icons.Default.Image
+                                    4 -> Icons.Default.Image
+                                    else -> Icons.Default.Chat
                                 },
                                 contentDescription = category
                             )
@@ -82,6 +95,7 @@ private fun ComponentCatalogApp() {
                 2 -> NavigationDemo()
                 3 -> FeedbackDemo()
                 4 -> MediaDemo()
+                5 -> ChatDemo()
             }
         }
     }
@@ -123,6 +137,13 @@ private fun MediaDemo() {
 }
 
 @Composable
+private fun ChatDemo() {
+    DemoSection("Chat Demo") {
+        GenUiChatDemo()
+    }
+}
+
+@Composable
 private fun DemoSection(title: String, content: @Composable () -> Unit) {
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
@@ -156,6 +177,161 @@ private fun A2UiDemo(json: String) {
             }
         }
     )
+}
+
+private enum class ChatRole { User, System }
+
+private data class ChatMessage(
+    val role: ChatRole,
+    val text: String
+)
+
+@Composable
+private fun GenUiChatDemo() {
+    val scope = rememberCoroutineScope()
+    val generator = remember { DemoChatGenerator() }
+    val initialDocument = remember { A2UiJson.decodeDocument(CHAT_INITIAL_JSON) }
+    val session = remember { A2UiSession(initialDocument, generator) }
+    val document by session.document.collectAsState()
+    val uiState by session.state.collectAsState()
+
+    var prompt by remember { mutableStateOf("") }
+    val messages = remember { mutableStateListOf<ChatMessage>() }
+
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("Prompt", style = MaterialTheme.typography.titleMedium)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    OutlinedTextField(
+                        modifier = Modifier.weight(1f),
+                        value = prompt,
+                        onValueChange = { prompt = it },
+                        placeholder = { Text("Describe the UI you want...") }
+                    )
+                    Button(
+                        onClick = {
+                            val trimmed = prompt.trim()
+                            if (trimmed.isEmpty()) return@Button
+                            messages += ChatMessage(ChatRole.User, trimmed)
+                            prompt = ""
+                            scope.launch {
+                                session.handleEvent(
+                                    A2UiEvent(
+                                        nodeId = "chatPrompt",
+                                        action = "prompt",
+                                        payload = JsonObject(mapOf("value" to JsonPrimitive(trimmed)))
+                                    )
+                                )
+                                messages += ChatMessage(ChatRole.System, "Generated UI for \"$trimmed\"")
+                            }
+                        }
+                    ) {
+                        Text("Generate")
+                    }
+                }
+            }
+        }
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text("Conversation", style = MaterialTheme.typography.titleMedium)
+                if (messages.isEmpty()) {
+                    Text(
+                        "Try prompts like \"login screen\" or \"profile card\".",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.heightIn(min = 120.dp, max = 200.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(messages) { message ->
+                            val isUser = message.role == ChatRole.User
+                            val bubbleColor = when (message.role) {
+                                ChatRole.User -> MaterialTheme.colorScheme.primaryContainer
+                                ChatRole.System -> MaterialTheme.colorScheme.secondaryContainer
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
+                            ) {
+                                Surface(
+                                    color = bubbleColor,
+                                    shape = MaterialTheme.shapes.medium
+                                ) {
+                                    Text(
+                                        modifier = Modifier.padding(12.dp),
+                                        text = message.text,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("Generated A2UI Surface", style = MaterialTheme.typography.titleMedium)
+                A2UiSurface(
+                    surfaceId = "chat-demo",
+                    document = document,
+                    catalog = defaultA2UiCatalog(),
+                    state = uiState,
+                    onUserAction = { action ->
+                        messages += action.asChatMessage()
+                    },
+                    onEvent = { event ->
+                        scope.launch { session.handleEvent(event) }
+                    }
+                )
+            }
+        }
+    }
+}
+
+private fun A2UiUserAction.asChatMessage(): ChatMessage {
+    val summary = "userAction: $actionName on $sourceComponentId (surface: $surfaceId)"
+    return ChatMessage(ChatRole.System, summary)
+}
+
+private class DemoChatGenerator : A2UiContentGenerator {
+    override suspend fun generate(
+        document: A2UiDocument,
+        state: A2UiState,
+        event: A2UiEvent?
+    ): A2UiDocument {
+        val prompt = event?.payload?.get("value")?.let { value ->
+            (value as? JsonPrimitive)?.contentOrNull
+        }?.trim().orEmpty()
+        if (prompt.isBlank()) return document
+
+        val json = when {
+            prompt.contains("login", ignoreCase = true) -> CHAT_LOGIN_JSON
+            prompt.contains("profile", ignoreCase = true) -> CHAT_PROFILE_JSON
+            else -> CHAT_FALLBACK_JSON
+        }
+        return A2UiJson.decodeDocument(json)
+    }
 }
 
 // ============================================================================
@@ -735,6 +911,96 @@ private const val MEDIA_DEMO_JSON = """
         ]
       },
       { "type": "text", "props": { "text": "← Swipe to navigate →", "textAlign": "center", "color": "#666666" } }
+    ]
+  }
+}
+"""
+
+// ============================================================================
+// CHAT DEMO GENERATED A2UI
+// ============================================================================
+private const val CHAT_INITIAL_JSON = """
+{
+  "root": {
+    "type": "column",
+    "props": { "spacing": 8, "padding": 12 },
+    "children": [
+      { "type": "text", "props": { "text": "Waiting for a prompt...", "fontWeight": "medium" } },
+      { "type": "text", "props": { "text": "Generated UI will appear here.", "color": "#666666" } }
+    ]
+  }
+}
+"""
+
+private const val CHAT_LOGIN_JSON = """
+{
+  "root": {
+    "type": "column",
+    "props": { "padding": 16, "spacing": 12 },
+    "children": [
+      { "type": "text", "props": { "text": "Welcome Back", "fontWeight": "bold", "fontSize": 20 } },
+      { "type": "textfield", "id": "email", "props": { "label": "Email", "placeholder": "you@example.com" } },
+      { "type": "textfield", "id": "password", "props": { "label": "Password", "variant": "filled", "placeholder": "••••••••" } },
+      { "type": "button", "id": "signIn", "props": { "label": "Sign in" } },
+      { "type": "text", "props": { "text": "Forgot password?", "color": "#666666" } }
+    ]
+  }
+}
+"""
+
+private const val CHAT_PROFILE_JSON = """
+{
+  "root": {
+    "type": "column",
+    "props": { "padding": 16, "spacing": 16 },
+    "children": [
+      {
+        "type": "row",
+        "props": { "spacing": 12, "verticalAlignment": "center" },
+        "children": [
+          { "type": "avatar", "props": { "url": "https://i.pravatar.cc/100?img=8", "size": 56 } },
+          {
+            "type": "column",
+            "props": { "spacing": 4 },
+            "children": [
+              { "type": "text", "props": { "text": "Alex Chen", "fontWeight": "bold", "fontSize": 18 } },
+              { "type": "text", "props": { "text": "Product Designer", "color": "#666666" } }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "card",
+        "props": { "padding": 16 },
+        "children": [
+          { "type": "text", "props": { "text": "Weekly Activity", "fontWeight": "medium" } },
+          { "type": "spacer", "props": { "height": 8 } },
+          { "type": "progress", "props": { "variant": "linear", "value": 0.65 } }
+        ]
+      },
+      { "type": "button", "id": "editProfile", "props": { "label": "Edit Profile", "variant": "outlined" } }
+    ]
+  }
+}
+"""
+
+private const val CHAT_FALLBACK_JSON = """
+{
+  "root": {
+    "type": "column",
+    "props": { "padding": 16, "spacing": 12 },
+    "children": [
+      { "type": "text", "props": { "text": "Generated UI Preview", "fontWeight": "bold", "fontSize": 18 } },
+      { "type": "text", "props": { "text": "Try prompts like: login screen, profile card, or settings." } },
+      {
+        "type": "row",
+        "props": { "spacing": 8 },
+        "children": [
+          { "type": "chip", "props": { "label": "Login screen" } },
+          { "type": "chip", "props": { "label": "Profile card" } },
+          { "type": "chip", "props": { "label": "Settings" } }
+        ]
+      }
     ]
   }
 }

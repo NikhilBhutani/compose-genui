@@ -20,7 +20,9 @@ data class A2UiNode(
 data class A2UiEvent(
     val nodeId: String,
     val action: String,
-    val payload: JsonObject = JsonObject(emptyMap())
+    val payload: JsonObject = JsonObject(emptyMap()),
+    val surfaceId: String? = null,
+    val timestamp: String? = null
 )
 
 data class A2UiState(
@@ -34,3 +36,18 @@ data class A2UiState(
     fun withValue(key: String, value: kotlinx.serialization.json.JsonElement): A2UiState =
         copy(values = values + (key to value))
 }
+
+@Serializable
+data class A2UiUserAction(
+    val surfaceId: String,
+    val sourceComponentId: String,
+    val actionName: String,
+    val context: JsonObject = JsonObject(emptyMap()),
+    val timestamp: String? = null
+)
+
+@Serializable
+data class A2UiUserActionMessage(
+    val type: String = "userAction",
+    val userAction: A2UiUserAction
+)
