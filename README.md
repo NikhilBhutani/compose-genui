@@ -12,6 +12,9 @@ Early scaffolding and demo. The data model and renderer will evolve as the A2UI 
 - Catalog-based rendering (only known components are allowed).
 - Composable renderer that maps JSON → Compose UI trees.
 - Session loop to handle user events and trigger AI/agent updates.
+- **LLM connectors** for Anthropic (Claude), OpenAI (GPT), and Google (Gemini).
+- **Schema validation** with strict mode, structural checks, and value validation.
+- **55+ Material 3 components** out of the box.
 
 ## Architecture
 At a high level:
@@ -77,9 +80,16 @@ Requirements:
 - Android Studio (latest stable)
 - Android SDK 34+
 - Kotlin 1.9.x
+- JDK 17+
 
-This repo does not include a Gradle wrapper yet. Use your local Gradle or Android Studio to build.
+### Build from command line
+```bash
+./gradlew build        # Build the project
+./gradlew test         # Run unit tests
+./gradlew :app:installDebug  # Install demo app
+```
 
+### Or with Android Studio
 Open the project in Android Studio, sync Gradle, and run the `app` module.
 
 ## Example
@@ -89,23 +99,102 @@ The sample app renders a simple A2UI document at runtime. See:
 ## A2UI compatibility
 This SDK aims to stay aligned with the A2UI format so agent outputs can be shared across ecosystems. The renderer currently supports a minimal subset of components and properties; the catalog is intentionally strict to keep generated UI safe and predictable.
 
-## Schema validation (experimental)
-You can validate A2UI documents against the built-in schema before rendering:
+## LLM Connectors
+
+Generate A2UI interfaces using LLMs from Anthropic, OpenAI, or Google:
 
 ```kotlin
-val result = validateA2Ui(document, strict = true)
-if (!result.isValid) {
-    // inspect result.issues
+// Using Anthropic Claude
+val generator = A2UiLlmGeneratorFactory.create(
+    provider = LlmProvider.ANTHROPIC,
+    apiKey = "your-anthropic-key"
+)
+
+// Using OpenAI GPT
+val generator = A2UiLlmGeneratorFactory.create(
+    provider = LlmProvider.OPENAI,
+    apiKey = "your-openai-key",
+    model = "gpt-4-turbo" // optional, defaults to gpt-4o
+)
+
+// Using Google Gemini
+val generator = A2UiLlmGeneratorFactory.create(
+    provider = LlmProvider.GEMINI,
+    apiKey = "your-gemini-key"
+)
+
+// Generate UI from a prompt
+val document = generator.generateFromPrompt("Create a login form with email and password")
+
+// Or use with session for interactive updates
+val session = A2UiSession(initialDocument, generator)
+session.handleEvent(event) // LLM generates updated UI
+```
+
+### DSL Builder
+
+```kotlin
+val generator = a2uiLlmGenerator {
+    provider = LlmProvider.ANTHROPIC
+    apiKey = "your-key"
+    model = "claude-3-opus-20240229"
+    temperature = 0.5f
+    maxTokens = 4096
+    systemPrompt = "Custom system prompt..." // optional
+    baseUrl = "https://proxy.example.com" // optional, for proxies
 }
 ```
 
-`strict = true` will warn on unknown props.
+### Supported Providers
+
+| Provider | Default Model | API Endpoint |
+|----------|--------------|--------------|
+| ANTHROPIC | claude-sonnet-4-20250514 | api.anthropic.com |
+| OPENAI | gpt-4o | api.openai.com |
+| GEMINI | gemini-2.0-flash | generativelanguage.googleapis.com |
+
+## Schema Validation
+
+Validate A2UI documents with comprehensive checks:
+
+```kotlin
+// Basic validation
+val result = validateA2Ui(document)
+if (!result.isValid) {
+    result.errors.forEach { println("Error: ${it.message}") }
+}
+
+// Strict validation with all checks
+val result = validateA2Ui(document, options = A2UiValidationOptions(
+    strict = true,           // Warn on unknown props
+    checkIds = true,         // Check for duplicate IDs
+    checkStructure = true,   // Validate parent-child relationships
+    checkValues = true,      // Validate prop types and ranges
+    checkIcons = true        // Validate icon names
+))
+
+// Check results
+result.isValid      // true if no errors
+result.hasWarnings  // true if any warnings
+result.errors       // list of validation errors
+result.warnings     // list of validation warnings
+```
+
+### Validation Features
+- **Unknown component detection**: Error on unrecognized component types
+- **Required prop checking**: Error when required props are missing
+- **Duplicate ID detection**: Error when same ID is used multiple times
+- **Structural validation**: Warn when components are in wrong context (e.g., `segment` outside `segmentedButton`)
+- **Value validation**: Warn on invalid variants, negative dimensions, out-of-range values
+- **Icon validation**: Warn on unrecognized icon names
+- **Strict mode**: Warn on any unknown props
 
 ## Roadmap
-- Expand component catalog and layout/style props.
-- Add A2UI schema validation.
-- Provide an adapter for strict A2UI compliance as the spec stabilizes.
-- Add LLM/agent connectors (Gemini, etc.) behind a common interface.
+- ~~Expand component catalog~~ ✅ 55+ components
+- ~~Add LLM connectors~~ ✅ Anthropic, OpenAI, Gemini
+- ~~Enhanced schema validation~~ ✅ Structural, value, and icon checks
+- Add streaming support for LLM responses
+- Add more unit tests
 
 ## Contributing
 Contributions are welcome. Please open an issue or PR with:
