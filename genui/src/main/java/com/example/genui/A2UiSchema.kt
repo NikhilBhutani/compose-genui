@@ -255,6 +255,161 @@ fun defaultA2UiSchema(): A2UiSchema {
             type = "segment",
             optionalProps = commonLayoutProps + setOf("label"),
             allowChildren = false
+        ),
+        // Card variants
+        A2UiComponentSpec(
+            type = "elevatedCard",
+            optionalProps = commonLayoutProps + setOf("elevation"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "outlinedCard",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        // Button variants
+        A2UiComponentSpec(
+            type = "elevatedButton",
+            optionalProps = commonLayoutProps + setOf("label", "enabled"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "tonalButton",
+            optionalProps = commonLayoutProps + setOf("label", "enabled"),
+            allowChildren = false
+        ),
+        // Chip variants
+        A2UiComponentSpec(
+            type = "inputChip",
+            optionalProps = commonLayoutProps + setOf("label", "selected", "icon"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "suggestionChip",
+            optionalProps = commonLayoutProps + setOf("label", "icon"),
+            allowChildren = false
+        ),
+        // Material 3 ListItem
+        A2UiComponentSpec(
+            type = "listItemM3",
+            optionalProps = commonLayoutProps + setOf("headline", "supporting", "overline", "leadingIcon", "trailingIcon"),
+            allowChildren = false
+        ),
+        // Navigation Rail
+        A2UiComponentSpec(
+            type = "navigationRail",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "railItem",
+            optionalProps = commonLayoutProps + setOf("label", "icon", "selected"),
+            allowChildren = false
+        ),
+        // Navigation Drawer
+        A2UiComponentSpec(
+            type = "navigationDrawer",
+            optionalProps = commonLayoutProps + setOf("open"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "drawerItem",
+            optionalProps = commonLayoutProps + setOf("label", "icon", "selected"),
+            allowChildren = false
+        ),
+        // TopAppBar variants
+        A2UiComponentSpec(
+            type = "centerTopAppBar",
+            optionalProps = commonLayoutProps + setOf("title", "navIcon"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "mediumTopAppBar",
+            optionalProps = commonLayoutProps + setOf("title", "navIcon"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "largeTopAppBar",
+            optionalProps = commonLayoutProps + setOf("title", "navIcon"),
+            allowChildren = true
+        ),
+        // Bottom App Bar
+        A2UiComponentSpec(
+            type = "bottomAppBar",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        // Tooltips
+        A2UiComponentSpec(
+            type = "tooltip",
+            optionalProps = commonLayoutProps + setOf("text"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "richTooltip",
+            optionalProps = commonLayoutProps + setOf("title", "text", "actionLabel"),
+            allowChildren = true
+        ),
+        // Dropdown / Select
+        A2UiComponentSpec(
+            type = "dropdown",
+            optionalProps = commonLayoutProps + setOf("label", "value", "expanded"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "option",
+            optionalProps = commonLayoutProps + setOf("label", "value"),
+            allowChildren = false
+        ),
+        // Pager / Carousel
+        A2UiComponentSpec(
+            type = "horizontalPager",
+            optionalProps = commonLayoutProps + setOf("initialPage"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "verticalPager",
+            optionalProps = commonLayoutProps + setOf("initialPage"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "page",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        // Banner
+        A2UiComponentSpec(
+            type = "banner",
+            optionalProps = commonLayoutProps + setOf("text", "icon", "actionLabel", "dismissLabel"),
+            allowChildren = false
+        ),
+        // Scrollable containers
+        A2UiComponentSpec(
+            type = "scrollColumn",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "scrollRow",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        // Date/Time Pickers
+        A2UiComponentSpec(
+            type = "datePicker",
+            optionalProps = commonLayoutProps + setOf("visible"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "timePicker",
+            optionalProps = commonLayoutProps + setOf("hour", "minute", "is24Hour"),
+            allowChildren = false
+        ),
+        // Swipe to dismiss
+        A2UiComponentSpec(
+            type = "swipeToDismiss",
+            optionalProps = commonLayoutProps + setOf("dismissBackground"),
+            allowChildren = true
         )
     )
 

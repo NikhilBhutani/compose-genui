@@ -21,16 +21,18 @@ At a high level:
 4. State updates trigger Compose recomposition.
 
 ## Built-in components (current)
-- Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`, `list`, `listRow`, `listItem`, `scaffold`
-- Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `rangeSlider`, `stepper`, `chip`, `filterChip`, `progress`, `segmentedButton`, `segment`, `searchBar`
-- Navigation: `topAppBar`, `navigationBar`, `navItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`, `bottomSheet`
+- Layout: `column`, `row`, `box`, `surface`, `card`, `elevatedCard`, `outlinedCard`, `spacer`, `divider`, `list`, `listRow`, `listItem`, `listItemM3`, `scaffold`, `scrollColumn`, `scrollRow`
+- Inputs: `textfield`, `button`, `elevatedButton`, `tonalButton`, `iconButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `rangeSlider`, `stepper`, `chip`, `filterChip`, `inputChip`, `suggestionChip`, `progress`, `segmentedButton`, `segment`, `searchBar`, `dropdown`, `option`, `datePicker`, `timePicker`
+- Navigation: `topAppBar`, `centerTopAppBar`, `mediumTopAppBar`, `largeTopAppBar`, `bottomAppBar`, `navigationBar`, `navItem`, `navigationRail`, `railItem`, `navigationDrawer`, `drawerItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`, `bottomSheet`
+- Paging: `horizontalPager`, `verticalPager`, `page`
 - Text: `text`
 - Media: `image`, `icon`, `avatar`
-- Feedback: `snackbar`, `badge`, `fab`
+- Feedback: `snackbar`, `badge`, `fab`, `banner`, `tooltip`, `richTooltip`
+- Gestures: `swipeToDismiss`
 
 ## Common style props (selected)
 - Layout: `padding`, `spacing`, `fill`, `width`, `height`, `size`, `reverse`
-- Buttons: `variant` (filled|outlined|text)
+- Buttons: `variant` (filled|outlined|text), `label`, `enabled`
 - TextField: `variant` (outlined|filled), `placeholder`, `singleLine`
 - FAB: `variant` (regular|small|large|extended), `icon`, `label`
 - Tabs: `selectedIndex`
@@ -39,6 +41,14 @@ At a high level:
 - BottomSheet: `visible`
 - SearchBar: `placeholder`, `active`
 - SegmentedButton: `selectedIndex` (children are `segment` with `label`)
+- Dropdown: `label`, `value`, `expanded` (children are `option` with `label`, `value`)
+- ListItemM3: `headline`, `supporting`, `overline`, `leadingIcon`, `trailingIcon`
+- Pager: `initialPage` (children are `page` components)
+- Banner: `text`, `icon`, `actionLabel`, `dismissLabel`
+- Tooltip: `text` (plain), or `title`, `text`, `actionLabel` (rich)
+- DatePicker: `visible`
+- TimePicker: `hour`, `minute`, `is24Hour`
+- SwipeToDismiss: `dismissBackground`
 - Shape: `cornerRadius`, `borderWidth`, `borderColor`
 - Surface: `elevation`
 - Text: `fontSize`, `fontWeight`, `fontStyle`, `textAlign`, `lineHeight`, `letterSpacing`, `color`
@@ -54,6 +64,9 @@ The following icon names are supported in `icon`, `iconButton`, `fab`, and other
 - Communication: `email`, `call`, `phone`
 - Places: `location`, `place`
 - Other: `settings`, `lock`, `logout`, `calendar`, `list`, `cart`
+
+## Component count
+**55+ components** covering the full Material 3 design system.
 
 ## Modules
 - `genui/`: library module (A2UI model, JSON parser, catalog registry, renderer, session loop).
