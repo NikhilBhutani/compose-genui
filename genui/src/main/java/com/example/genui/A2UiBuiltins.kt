@@ -1,3 +1,8 @@
+@file:OptIn(
+    androidx.compose.foundation.ExperimentalFoundationApi::class,
+    androidx.compose.material3.ExperimentalMaterial3Api::class
+)
+
 package com.example.genui
 
 import androidx.compose.foundation.background
@@ -108,7 +113,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
@@ -161,6 +165,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import coil.compose.AsyncImage
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
@@ -176,7 +184,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 verticalArrangement = arrangement,
                 horizontalAlignment = hAlign
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "row" to { node, state, onEvent, renderChild ->
@@ -190,7 +200,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 horizontalArrangement = arrangement,
                 verticalAlignment = vAlign
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "box" to { node, state, onEvent, renderChild ->
@@ -201,7 +213,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 modifier = modifier,
                 contentAlignment = alignment
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "surface" to { node, state, onEvent, renderChild ->
@@ -213,7 +227,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 tonalElevation = elevation,
                 shape = shape
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "divider" to { node, state, onEvent, renderChild ->
@@ -365,7 +381,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 }
             ) {
                 if (node.children.isNotEmpty()) {
-                    node.children.forEach(renderChild)
+                    for (child in node.children) {
+                        renderChild(child)
+                    }
                 }
             }
         },
@@ -402,8 +420,8 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             val navIconName = node.props.string("navIcon")
             TopAppBar(
                 title = { Text(title) },
-                navigationIcon = if (navIconName != null) {
-                    {
+                navigationIcon = {
+                    if (navIconName != null) {
                         val vector = iconByName(navIconName)
                         if (vector != null) {
                             IconButton(onClick = {
@@ -414,15 +432,19 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                             }
                         }
                     }
-                } else null,
+                },
                 actions = {
-                    node.children.forEach(renderChild)
+                    for (child in node.children) {
+                        renderChild(child)
+                    }
                 }
             )
         },
         "navigationBar" to { node, state, onEvent, renderChild ->
             NavigationBar(modifier = node.props.toModifier()) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "navItem" to { node, state, onEvent, renderChild ->
@@ -430,19 +452,25 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             val selected = node.props.bool("selected") ?: false
             val iconName = node.props.string("icon")
             val iconVector = iconName?.let { iconByName(it) }
-            NavigationBarItem(
-                selected = selected,
-                onClick = {
-                    val id = node.id ?: "navItem"
-                    onEvent(A2UiEvent(id, "select"))
-                },
-                icon = {
-                    if (iconVector != null) {
-                        Icon(imageVector = iconVector, contentDescription = null)
-                    }
-                },
-                label = { Text(label) }
-            )
+            val id = node.id ?: "navItem"
+            val background = if (selected) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            } else {
+                Color.Transparent
+            }
+            Column(
+                modifier = node.props.toModifier()
+                    .padding(vertical = 8.dp, horizontal = 12.dp)
+                    .background(background, shape = MaterialTheme.shapes.medium)
+                    .clickable { onEvent(A2UiEvent(id, "select")) },
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (iconVector != null) {
+                    Icon(imageVector = iconVector, contentDescription = null)
+                }
+                Text(label, style = MaterialTheme.typography.labelSmall)
+            }
         },
         "tabs" to { node, state, onEvent, renderChild ->
             val selectedIndex = node.props.int("selectedIndex") ?: 0
@@ -470,7 +498,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 },
                 modifier = node.props.toModifier()
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "menuItem" to { node, state, onEvent, renderChild ->
@@ -734,7 +764,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 shape = shape,
                 elevation = CardDefaults.cardElevation(defaultElevation = elevation)
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "image" to { node, state, onEvent, renderChild ->
@@ -795,7 +827,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 horizontalArrangement = Arrangement.spacedBy(spacing),
                 verticalAlignment = node.props.vAlignment() ?: Alignment.CenterVertically
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "spacer" to { node, state, onEvent, renderChild ->
@@ -837,9 +871,11 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 "extended" -> ExtendedFloatingActionButton(
                     modifier = node.props.toModifier(),
                     onClick = onClick,
-                    icon = if (iconVector != null) {
-                        { Icon(imageVector = iconVector, contentDescription = null) }
-                    } else null,
+                    icon = {
+                        if (iconVector != null) {
+                            Icon(imageVector = iconVector, contentDescription = null)
+                        }
+                    },
                     text = { Text(label ?: "Action") }
                 )
                 else -> FloatingActionButton(
@@ -878,7 +914,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 }
             ) { paddingValues ->
                 Column(modifier = Modifier.padding(paddingValues)) {
-                    contentNodes.forEach(renderChild)
+                    for (child in contentNodes) {
+                        renderChild(child)
+                    }
                 }
             }
         },
@@ -892,7 +930,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                         onEvent(A2UiEvent(id, "dismiss"))
                     }
                 ) {
-                    node.children.forEach(renderChild)
+                    for (child in node.children) {
+                        renderChild(child)
+                    }
                 }
             }
         },
@@ -935,7 +975,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 placeholder = { Text(placeholder) },
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) }
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "segmentedButton" to @Composable { node, state, onEvent, renderChild ->
@@ -977,7 +1019,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 shape = shape,
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = elevation)
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "outlinedCard" to { node, state, onEvent, renderChild ->
@@ -987,7 +1031,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 modifier = node.props.toModifier(),
                 shape = shape
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         // Button variants
@@ -1073,7 +1119,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         // Navigation Rail (for tablets/desktop)
         "navigationRail" to { node, state, onEvent, renderChild ->
             NavigationRail(modifier = node.props.toModifier()) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "railItem" to { node, state, onEvent, renderChild ->
@@ -1105,11 +1153,15 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 drawerState = drawerState,
                 drawerContent = {
                     ModalDrawerSheet {
-                        drawerContent.forEach(renderChild)
+                        for (child in drawerContent) {
+                            renderChild(child)
+                        }
                     }
                 }
             ) {
-                mainContent.forEach(renderChild)
+                for (child in mainContent) {
+                    renderChild(child)
+                }
             }
         },
         "drawerItem" to { node, state, onEvent, renderChild ->
@@ -1132,8 +1184,8 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             val navIconName = node.props.string("navIcon")
             CenterAlignedTopAppBar(
                 title = { Text(title) },
-                navigationIcon = if (navIconName != null) {
-                    {
+                navigationIcon = {
+                    if (navIconName != null) {
                         val vector = iconByName(navIconName)
                         if (vector != null) {
                             IconButton(onClick = {
@@ -1144,8 +1196,12 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                             }
                         }
                     }
-                } else ({}),
-                actions = { node.children.forEach(renderChild) }
+                },
+                actions = {
+                    for (child in node.children) {
+                        renderChild(child)
+                    }
+                }
             )
         },
         "mediumTopAppBar" to @Composable { node, state, onEvent, renderChild ->
@@ -1153,8 +1209,8 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             val navIconName = node.props.string("navIcon")
             MediumTopAppBar(
                 title = { Text(title) },
-                navigationIcon = if (navIconName != null) {
-                    {
+                navigationIcon = {
+                    if (navIconName != null) {
                         val vector = iconByName(navIconName)
                         if (vector != null) {
                             IconButton(onClick = {
@@ -1165,8 +1221,12 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                             }
                         }
                     }
-                } else ({}),
-                actions = { node.children.forEach(renderChild) }
+                },
+                actions = {
+                    for (child in node.children) {
+                        renderChild(child)
+                    }
+                }
             )
         },
         "largeTopAppBar" to @Composable { node, state, onEvent, renderChild ->
@@ -1174,8 +1234,8 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             val navIconName = node.props.string("navIcon")
             LargeTopAppBar(
                 title = { Text(title) },
-                navigationIcon = if (navIconName != null) {
-                    {
+                navigationIcon = {
+                    if (navIconName != null) {
                         val vector = iconByName(navIconName)
                         if (vector != null) {
                             IconButton(onClick = {
@@ -1186,8 +1246,12 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                             }
                         }
                     }
-                } else ({}),
-                actions = { node.children.forEach(renderChild) }
+                },
+                actions = {
+                    for (child in node.children) {
+                        renderChild(child)
+                    }
+                }
             )
         },
         // Bottom App Bar
@@ -1195,7 +1259,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
             BottomAppBar(
                 modifier = node.props.toModifier(),
                 actions = {
-                    node.children.filter { it.type != "fab" }.forEach(renderChild)
+                    for (child in node.children.filter { it.type != "fab" }) {
+                        renderChild(child)
+                    }
                 },
                 floatingActionButton = {
                     val fabNode = node.children.find { it.type == "fab" }
@@ -1215,7 +1281,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 tooltip = { PlainTooltip { Text(text) } },
                 state = tooltipState
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "richTooltip" to @Composable { node, state, onEvent, renderChild ->
@@ -1237,7 +1305,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 },
                 state = tooltipState
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         // Dropdown / Select
@@ -1312,7 +1382,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
         },
         "page" to { node, state, onEvent, renderChild ->
             Box(modifier = node.props.toModifier()) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         // Banner (informational)
@@ -1356,7 +1428,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 modifier = node.props.toModifier().verticalScroll(scrollState),
                 verticalArrangement = node.props.spacingDp()?.let { Arrangement.spacedBy(it) } ?: Arrangement.Top
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         "scrollRow" to { node, state, onEvent, renderChild ->
@@ -1365,7 +1439,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 modifier = node.props.toModifier().horizontalScroll(scrollState),
                 horizontalArrangement = node.props.spacingDp()?.let { Arrangement.spacedBy(it) } ?: Arrangement.Start
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         },
         // Date/Time Pickers (dialog-based)
@@ -1433,7 +1509,9 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                     Box(modifier = Modifier.fillMaxWidth().background(bgColor))
                 }
             ) {
-                node.children.forEach(renderChild)
+                for (child in node.children) {
+                    renderChild(child)
+                }
             }
         }
     )

@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import kotlinx.serialization.json.JsonObject
 
 internal fun JsonObject.toModifier(): Modifier {
-    var modifier = Modifier
+    var modifier: Modifier = Modifier
     val padding = padding()
     if (padding != null) {
         modifier = modifier.padding(
