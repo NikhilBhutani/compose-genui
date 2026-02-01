@@ -2,6 +2,7 @@ package com.example.genui
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
 
 @Serializable
 data class A2UiDocument(
