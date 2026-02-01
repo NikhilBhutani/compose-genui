@@ -185,6 +185,7 @@ private const val SAMPLE_DOC_JSON = """
         "children": [
           { "type": "text", "props": { "text": "Volume", "fontWeight": "medium" } },
           { "type": "slider", "id": "volume", "props": { "min": 0, "max": 100, "value": 30 } },
+          { "type": "rangeSlider", "props": { "min": 0, "max": 100, "start": 10, "end": 70 } },
           { "type": "stepper", "id": "steps", "props": { "min": 0, "max": 10, "step": 1, "value": 3 } }
         ]
       },
@@ -241,7 +242,7 @@ private const val SAMPLE_DOC_JSON = """
         "children": [
           { "type": "chip", "props": { "label": "Compose", "icon": "favorite" } },
           { "type": "chip", "props": { "label": "GenUI" } },
-          { "type": "chip", "props": { "label": "A2UI" } }
+          { "type": "filterChip", "props": { "label": "A2UI", "selected": true } }
         ]
       },
       {
