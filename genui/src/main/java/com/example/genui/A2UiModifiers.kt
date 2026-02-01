@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import kotlinx.serialization.json.JsonObject
 
 internal fun JsonObject.toModifier(): Modifier {
     var modifier = Modifier
