@@ -6,45 +6,92 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.DockedSearchBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -55,6 +102,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TriStateCheckbox
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -207,6 +256,19 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 leadingIcon = if (iconVector != null) {
                     { Icon(imageVector = iconVector, contentDescription = null) }
                 } else null
+            )
+        },
+        "filterChip" to { node, state, onEvent, renderChild ->
+            val label = node.props.string("label") ?: "Filter"
+            val selected = node.props.bool("selected") ?: false
+            FilterChip(
+                modifier = node.props.toModifier(),
+                selected = selected,
+                onClick = {
+                    val id = node.id ?: "filterChip"
+                    onEvent(A2UiEvent(id, "click"))
+                },
+                label = { Text(label) }
             )
         },
         "progress" to { node, state, onEvent, renderChild ->
@@ -564,6 +626,35 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 }
             )
         },
+        "rangeSlider" to { node, state, onEvent, renderChild ->
+            val id = node.id ?: "range"
+            val enabled = node.props.bool("enabled") ?: true
+            val min = node.props.float("min") ?: 0f
+            val max = node.props.float("max") ?: 1f
+            val steps = node.props.int("steps") ?: 0
+            val start = node.props.float("start") ?: min
+            val end = node.props.float("end") ?: max
+            RangeSlider(
+                modifier = node.props.toModifier(),
+                enabled = enabled,
+                value = start.coerceIn(min, max)..end.coerceIn(min, max),
+                steps = steps,
+                onValueChange = { range ->
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "input",
+                            payload = JsonObject(
+                                mapOf(
+                                    "start" to JsonPrimitive(range.start),
+                                    "end" to JsonPrimitive(range.endInclusive)
+                                )
+                            )
+                        )
+                    )
+                }
+            )
+        },
         "stepper" to { node, state, onEvent, renderChild ->
             val id = node.id ?: "stepper"
             val min = node.props.int("min") ?: 0
@@ -672,20 +763,213 @@ fun defaultA2UiCatalog(): A2UiCatalog = A2UiCatalogRegistry(
                 height != null -> Spacer(modifier = Modifier.height(height))
                 else -> Spacer(modifier = Modifier.height(8.dp))
             }
+        },
+        "fab" to { node, state, onEvent, renderChild ->
+            val variant = node.props.string("variant") ?: "regular"
+            val label = node.props.string("label")
+            val iconName = node.props.string("icon") ?: "add"
+            val iconVector = iconByName(iconName)
+            val onClick = {
+                val id = node.id ?: "fab"
+                onEvent(A2UiEvent(id, "click"))
+            }
+            when (variant) {
+                "small" -> SmallFloatingActionButton(
+                    modifier = node.props.toModifier(),
+                    onClick = onClick
+                ) {
+                    if (iconVector != null) {
+                        Icon(imageVector = iconVector, contentDescription = null)
+                    }
+                }
+                "large" -> LargeFloatingActionButton(
+                    modifier = node.props.toModifier(),
+                    onClick = onClick
+                ) {
+                    if (iconVector != null) {
+                        Icon(imageVector = iconVector, contentDescription = null, modifier = Modifier.size(36.dp))
+                    }
+                }
+                "extended" -> ExtendedFloatingActionButton(
+                    modifier = node.props.toModifier(),
+                    onClick = onClick,
+                    icon = if (iconVector != null) {
+                        { Icon(imageVector = iconVector, contentDescription = null) }
+                    } else null,
+                    text = { Text(label ?: "Action") }
+                )
+                else -> FloatingActionButton(
+                    modifier = node.props.toModifier(),
+                    onClick = onClick
+                ) {
+                    if (iconVector != null) {
+                        Icon(imageVector = iconVector, contentDescription = null)
+                    }
+                }
+            }
+        },
+        "scaffold" to { node, state, onEvent, renderChild ->
+            val topBarNode = node.children.find { it.type == "topAppBar" }
+            val bottomBarNode = node.children.find { it.type == "navigationBar" }
+            val fabNode = node.children.find { it.type == "fab" }
+            val contentNodes = node.children.filter { 
+                it.type != "topAppBar" && it.type != "navigationBar" && it.type != "fab" 
+            }
+            Scaffold(
+                modifier = node.props.toModifier(),
+                topBar = {
+                    if (topBarNode != null) {
+                        renderChild(topBarNode)
+                    }
+                },
+                bottomBar = {
+                    if (bottomBarNode != null) {
+                        renderChild(bottomBarNode)
+                    }
+                },
+                floatingActionButton = {
+                    if (fabNode != null) {
+                        renderChild(fabNode)
+                    }
+                }
+            ) { paddingValues ->
+                Column(modifier = Modifier.padding(paddingValues)) {
+                    contentNodes.forEach(renderChild)
+                }
+            }
+        },
+        "bottomSheet" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "bottomSheet"
+            val visible = node.props.bool("visible") ?: true
+            if (visible) {
+                ModalBottomSheet(
+                    modifier = node.props.toModifier(),
+                    onDismissRequest = {
+                        onEvent(A2UiEvent(id, "dismiss"))
+                    }
+                ) {
+                    node.children.forEach(renderChild)
+                }
+            }
+        },
+        "searchBar" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "searchBar"
+            val placeholder = node.props.string("placeholder") ?: "Search"
+            val query = state.string(id) ?: ""
+            val active = node.props.bool("active") ?: false
+            DockedSearchBar(
+                modifier = node.props.toModifier(),
+                query = query,
+                onQueryChange = { value ->
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "input",
+                            payload = JsonObject(mapOf("value" to JsonPrimitive(value)))
+                        )
+                    )
+                },
+                onSearch = { value ->
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "search",
+                            payload = JsonObject(mapOf("query" to JsonPrimitive(value)))
+                        )
+                    )
+                },
+                active = active,
+                onActiveChange = { isActive ->
+                    onEvent(
+                        A2UiEvent(
+                            nodeId = id,
+                            action = "activeChange",
+                            payload = JsonObject(mapOf("active" to JsonPrimitive(isActive)))
+                        )
+                    )
+                },
+                placeholder = { Text(placeholder) },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) }
+            ) {
+                node.children.forEach(renderChild)
+            }
+        },
+        "segmentedButton" to @Composable { node, state, onEvent, renderChild ->
+            val id = node.id ?: "segmented"
+            val options = node.children.mapNotNull { it.props.string("label") }
+            val selectedIndex = state.valueOrNull(id)?.jsonPrimitive?.intOrNull
+                ?: node.props.int("selectedIndex")
+                ?: 0
+            SingleChoiceSegmentedButtonRow(modifier = node.props.toModifier()) {
+                options.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        selected = index == selectedIndex,
+                        onClick = {
+                            onEvent(
+                                A2UiEvent(
+                                    nodeId = id,
+                                    action = "select",
+                                    payload = JsonObject(mapOf("index" to JsonPrimitive(index)))
+                                )
+                            )
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size)
+                    ) {
+                        Text(label)
+                    }
+                }
+            }
+        },
+        "segment" to { node, state, onEvent, renderChild ->
+            // Placeholder for segment children - rendering handled by segmentedButton parent
         }
     )
 )
 
 private fun iconByName(name: String): ImageVector? = when (name) {
+    "account", "accountCircle" -> Icons.Filled.AccountCircle
     "add" -> Icons.Filled.Add
-    "back" -> Icons.Filled.ArrowBack
+    "arrowBack", "back" -> Icons.Filled.ArrowBack
+    "arrowForward", "forward" -> Icons.Filled.ArrowForward
+    "build" -> Icons.Filled.Build
+    "call" -> Icons.Filled.Call
     "check" -> Icons.Filled.Check
+    "clear" -> Icons.Filled.Clear
     "close" -> Icons.Filled.Close
+    "create" -> Icons.Filled.Create
+    "dateRange", "calendar" -> Icons.Filled.DateRange
+    "delete" -> Icons.Filled.Delete
+    "done" -> Icons.Filled.Done
     "edit" -> Icons.Filled.Edit
+    "email", "mail" -> Icons.Filled.Email
+    "exit", "logout" -> Icons.Filled.ExitToApp
+    "face" -> Icons.Filled.Face
     "favorite" -> Icons.Filled.Favorite
+    "favoriteBorder" -> Icons.Filled.FavoriteBorder
+    "home" -> Icons.Filled.Home
     "info" -> Icons.Filled.Info
+    "keyboardArrowDown", "arrowDown" -> Icons.Filled.KeyboardArrowDown
+    "keyboardArrowLeft", "arrowLeft" -> Icons.Filled.KeyboardArrowLeft
+    "keyboardArrowRight", "arrowRight" -> Icons.Filled.KeyboardArrowRight
+    "keyboardArrowUp", "arrowUp" -> Icons.Filled.KeyboardArrowUp
+    "list" -> Icons.Filled.List
+    "location", "locationOn" -> Icons.Filled.LocationOn
+    "lock" -> Icons.Filled.Lock
     "menu" -> Icons.Filled.Menu
+    "moreVert", "more" -> Icons.Filled.MoreVert
+    "notifications", "notification" -> Icons.Filled.Notifications
+    "person" -> Icons.Filled.Person
+    "phone" -> Icons.Filled.Phone
+    "place" -> Icons.Filled.Place
+    "play", "playArrow" -> Icons.Filled.PlayArrow
+    "refresh" -> Icons.Filled.Refresh
     "search" -> Icons.Filled.Search
+    "send" -> Icons.Filled.Send
     "settings" -> Icons.Filled.Settings
+    "share" -> Icons.Filled.Share
+    "shoppingCart", "cart" -> Icons.Filled.ShoppingCart
+    "star" -> Icons.Filled.Star
+    "thumbUp", "like" -> Icons.Filled.ThumbUp
+    "warning" -> Icons.Filled.Warning
     else -> null
 }

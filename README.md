@@ -21,25 +21,39 @@ At a high level:
 4. State updates trigger Compose recomposition.
 
 ## Built-in components (current)
-- Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`, `list`, `listRow`, `listItem`
-- Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `stepper`, `chip`, `progress`
-- Navigation: `topAppBar`, `navigationBar`, `navItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`
+- Layout: `column`, `row`, `box`, `surface`, `card`, `spacer`, `divider`, `list`, `listRow`, `listItem`, `scaffold`
+- Inputs: `textfield`, `button`, `iconButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `rangeSlider`, `stepper`, `chip`, `filterChip`, `progress`, `segmentedButton`, `segment`, `searchBar`
+- Navigation: `topAppBar`, `navigationBar`, `navItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`, `bottomSheet`
 - Text: `text`
 - Media: `image`, `icon`, `avatar`
-- Feedback: `snackbar`, `badge`
+- Feedback: `snackbar`, `badge`, `fab`
 
 ## Common style props (selected)
 - Layout: `padding`, `spacing`, `fill`, `width`, `height`, `size`, `reverse`
 - Buttons: `variant` (filled|outlined|text)
 - TextField: `variant` (outlined|filled), `placeholder`, `singleLine`
+- FAB: `variant` (regular|small|large|extended), `icon`, `label`
 - Tabs: `selectedIndex`
 - Navigation: `navIcon`, `selected`
 - Progress: `variant` (circular|linear), `value`
+- BottomSheet: `visible`
+- SearchBar: `placeholder`, `active`
+- SegmentedButton: `selectedIndex` (children are `segment` with `label`)
 - Shape: `cornerRadius`, `borderWidth`, `borderColor`
 - Surface: `elevation`
 - Text: `fontSize`, `fontWeight`, `fontStyle`, `textAlign`, `lineHeight`, `letterSpacing`, `color`
 
 These live in `defaultA2UiCatalog()` and are intentionally minimal for safety.
+
+## Available icons
+The following icon names are supported in `icon`, `iconButton`, `fab`, and other icon-accepting components:
+- Navigation: `home`, `menu`, `back`, `forward`, `arrowUp`, `arrowDown`, `arrowLeft`, `arrowRight`, `close`, `more`
+- Actions: `add`, `edit`, `delete`, `search`, `refresh`, `share`, `send`, `play`, `check`, `done`, `clear`, `create`, `build`
+- Status: `info`, `warning`, `notifications`, `star`, `favorite`, `favoriteBorder`, `like`
+- People: `person`, `account`, `face`
+- Communication: `email`, `call`, `phone`
+- Places: `location`, `place`
+- Other: `settings`, `lock`, `logout`, `calendar`, `list`, `cart`
 
 ## Modules
 - `genui/`: library module (A2UI model, JSON parser, catalog registry, renderer, session loop).

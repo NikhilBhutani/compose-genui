@@ -111,6 +111,11 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = false
         ),
         A2UiComponentSpec(
+            type = "filterChip",
+            optionalProps = commonLayoutProps + setOf("label", "selected"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
             type = "progress",
             optionalProps = commonLayoutProps + setOf("variant", "value"),
             allowChildren = false
@@ -201,6 +206,11 @@ fun defaultA2UiSchema(): A2UiSchema {
             allowChildren = false
         ),
         A2UiComponentSpec(
+            type = "rangeSlider",
+            optionalProps = commonLayoutProps + setOf("start", "end", "min", "max", "steps", "enabled"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
             type = "stepper",
             optionalProps = commonLayoutProps + setOf("value", "min", "max", "step"),
             allowChildren = false
@@ -214,6 +224,36 @@ fun defaultA2UiSchema(): A2UiSchema {
         A2UiComponentSpec(
             type = "icon",
             optionalProps = commonLayoutProps + setOf("name", "contentDescription", "color"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "fab",
+            optionalProps = commonLayoutProps + setOf("icon", "label", "variant"),
+            allowChildren = false
+        ),
+        A2UiComponentSpec(
+            type = "scaffold",
+            optionalProps = commonLayoutProps,
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "bottomSheet",
+            optionalProps = commonLayoutProps + setOf("visible"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "searchBar",
+            optionalProps = commonLayoutProps + setOf("placeholder", "active"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "segmentedButton",
+            optionalProps = commonLayoutProps + setOf("selectedIndex"),
+            allowChildren = true
+        ),
+        A2UiComponentSpec(
+            type = "segment",
+            optionalProps = commonLayoutProps + setOf("label"),
             allowChildren = false
         )
     )
