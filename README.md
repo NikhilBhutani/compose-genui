@@ -1,222 +1,333 @@
-# Compose GenUI (A2UI-aligned)
+# Compose GenUI
 
-Compose GenUI is an experimental Jetpack Compose SDK that renders **A2UI (Agent-to-User Interface)** JSON into native Compose UIs. It provides a safe, catalog-driven rendering layer and a session loop for integrating AI/agent backends. The goal is to be a Compose-native counterpart to Flutter GenUI while staying compatible with the broader A2UI ecosystem as it evolves.
+Compose GenUI is a Jetpack Compose SDK that turns **natural-language prompts into native Android UIs** using the A2UI (Agent-to-User Interface) JSON format. Pass an API key, send a prompt, get a rendered UI — the SDK handles the agentic loop, conversation history, component catalog, and rendering.
+
+Inspired by [Flutter GenUI](https://docs.flutter.dev/ai/genui) and aligned with the A2UI ecosystem.
 
 Repository: https://github.com/NikhilBhutani/compose-genui
 
-## Status
-Early scaffolding and demo. The data model and renderer will evolve as the A2UI spec stabilizes.
+## Quick Start
 
-## Key features
-- A2UI JSON document model and decoder.
-- Catalog-based rendering (only known components are allowed).
-- Composable renderer that maps JSON → Compose UI trees.
-- Session loop to handle user events and trigger AI/agent updates.
-- **LLM connectors** for Anthropic (Claude), OpenAI (GPT), and Google (Gemini).
-- **Schema validation** with strict mode, structural checks, and value validation.
-- **55+ Material 3 components** out of the box.
+```kotlin
+// 1. Pick a provider, pass your API key
+val generator = GeminiContentGenerator(apiKey = "YOUR_KEY")
+
+// 2. Create a conversation — SDK handles system prompt, history, agentic loop
+val conversation = GenUiConversation(
+    catalog = defaultGenUiCatalog(),
+    contentGenerator = generator
+)
+
+// 3. Send a prompt
+conversation.sendRequest("Show me a login form")
+
+// 4. Render
+GenUiSurface(conversation = conversation)
+```
+
+That's it. Four lines of setup.
+
+## How It Works
+
+```mermaid
+sequenceDiagram
+    participant App
+    participant GenUiConversation
+    participant ContentGenerator
+    participant LLM
+    participant GenUiSurface
+
+    App->>GenUiConversation: sendRequest("login form")
+    GenUiConversation->>GenUiConversation: Build system prompt<br/>(catalog schema + context)
+    GenUiConversation->>GenUiConversation: Build user message<br/>(prompt + current doc + state + last action)
+    GenUiConversation->>ContentGenerator: generate(GenUiRequest)
+    ContentGenerator->>LLM: API call with system prompt + history
+    LLM-->>ContentGenerator: A2UI JSON response
+    ContentGenerator-->>GenUiConversation: Flow<GenUiResponse>
+    GenUiConversation->>GenUiConversation: Parse JSON → A2UiDocument
+    GenUiConversation->>GenUiConversation: Update document StateFlow
+
+    GenUiSurface->>GenUiConversation: collectAsState(document)
+    GenUiSurface->>GenUiSurface: Render via A2UiCatalog
+
+    Note over GenUiSurface,App: User interacts (button click, text input)
+
+    GenUiSurface->>GenUiConversation: onUserAction(action)
+    GenUiConversation->>GenUiConversation: Store action context
+
+    App->>GenUiConversation: sendRequest("next prompt")
+    Note over GenUiConversation,LLM: Loop continues with full context
+```
+
+### Agentic Loop
+
+1. **Developer** calls `conversation.sendRequest(prompt)`
+2. **GenUiConversation** builds a system prompt with the full component catalog schema, appends current document state, form values, and last user action as context
+3. **ContentGenerator** sends the request to an LLM (Gemini, Claude, GPT, or Firebase AI)
+4. **LLM** returns A2UI JSON describing the UI
+5. **GenUiConversation** parses the JSON, updates `document: StateFlow<A2UiDocument?>`
+6. **GenUiSurface** observes the StateFlow and renders native Compose UI
+7. **User interactions** (button clicks, text input) are captured and fed back as context for the next request
 
 ## Architecture
-At a high level:
-1. User input produces an `A2UiEvent`.
-2. A content generator (LLM/agent) produces updated A2UI JSON.
-3. The renderer maps A2UI nodes to your registered composables.
-4. State updates trigger Compose recomposition.
 
-## Built-in components (current)
-- Layout: `column`, `row`, `box`, `surface`, `card`, `elevatedCard`, `outlinedCard`, `spacer`, `divider`, `list`, `listRow`, `listItem`, `listItemM3`, `scaffold`, `scrollColumn`, `scrollRow`
-- Inputs: `textfield`, `button`, `elevatedButton`, `tonalButton`, `iconButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `rangeSlider`, `stepper`, `chip`, `filterChip`, `inputChip`, `suggestionChip`, `progress`, `segmentedButton`, `segment`, `searchBar`, `dropdown`, `option`, `datePicker`, `timePicker`
-- Navigation: `topAppBar`, `centerTopAppBar`, `mediumTopAppBar`, `largeTopAppBar`, `bottomAppBar`, `navigationBar`, `navItem`, `navigationRail`, `railItem`, `navigationDrawer`, `drawerItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`, `bottomSheet`
-- Paging: `horizontalPager`, `verticalPager`, `page`
-- Text: `text`
-- Media: `image`, `icon`, `avatar`
-- Feedback: `snackbar`, `badge`, `fab`, `banner`, `tooltip`, `richTooltip`
-- Gestures: `swipeToDismiss`
-
-## Common style props (selected)
-- Layout: `padding`, `spacing`, `fill`, `width`, `height`, `size`, `reverse`
-- Buttons: `variant` (filled|outlined|text), `label`, `enabled`
-- TextField: `variant` (outlined|filled), `placeholder`, `singleLine`
-- FAB: `variant` (regular|small|large|extended), `icon`, `label`
-- Tabs: `selectedIndex`
-- Navigation: `navIcon`, `selected`
-- Progress: `variant` (circular|linear), `value`
-- BottomSheet: `visible`
-- SearchBar: `placeholder`, `active`
-- SegmentedButton: `selectedIndex` (children are `segment` with `label`)
-- Dropdown: `label`, `value`, `expanded` (children are `option` with `label`, `value`)
-- ListItemM3: `headline`, `supporting`, `overline`, `leadingIcon`, `trailingIcon`
-- Pager: `initialPage` (children are `page` components)
-- Banner: `text`, `icon`, `actionLabel`, `dismissLabel`
-- Tooltip: `text` (plain), or `title`, `text`, `actionLabel` (rich)
-- DatePicker: `visible`
-- TimePicker: `hour`, `minute`, `is24Hour`
-- SwipeToDismiss: `dismissBackground`
-- Shape: `cornerRadius`, `borderWidth`, `borderColor`
-- Surface: `elevation`
-- Text: `fontSize`, `fontWeight`, `fontStyle`, `textAlign`, `lineHeight`, `letterSpacing`, `color`
-
-These live in `defaultA2UiCatalog()` and are intentionally minimal for safety.
-
-## Available icons
-The following icon names are supported in `icon`, `iconButton`, `fab`, and other icon-accepting components:
-- Navigation: `home`, `menu`, `back`, `forward`, `arrowUp`, `arrowDown`, `arrowLeft`, `arrowRight`, `close`, `more`
-- Actions: `add`, `edit`, `delete`, `search`, `refresh`, `share`, `send`, `play`, `check`, `done`, `clear`, `create`, `build`
-- Status: `info`, `warning`, `notifications`, `star`, `favorite`, `favoriteBorder`, `like`
-- People: `person`, `account`, `face`
-- Communication: `email`, `call`, `phone`
-- Places: `location`, `place`
-- Other: `settings`, `lock`, `logout`, `calendar`, `list`, `cart`
-
-## Component count
-**55+ components** covering the full Material 3 design system.
+```
+┌─────────────────────────────────────────────────────┐
+│                   Your App                          │
+│  val generator = GeminiContentGenerator(apiKey)     │
+│  val conversation = GenUiConversation(catalog,      │
+│                       contentGenerator = generator) │
+│  GenUiSurface(conversation = conversation)          │
+└──────────────────────┬──────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│              genui (core SDK)                        │
+│                                                      │
+│  GenUiConversation    ← orchestration facade         │
+│  GenUiSurface         ← Composable binding           │
+│  GenUiCatalog         ← unified schema + renderers   │
+│  GenUiContentGenerator← pluggable LLM interface      │
+│                                                      │
+│  A2UiRender / A2UiSurface  ← low-level renderer     │
+│  A2UiModels / A2UiJson     ← document model         │
+│  A2UiSchema / A2UiValidator ← validation             │
+│  builtins/ (60+ Material 3 components)               │
+│                                                      │
+│  llm/                                                │
+│  ├── AnthropicContentGenerator                       │
+│  ├── OpenAiContentGenerator                          │
+│  └── GeminiContentGenerator                          │
+└──────────────────────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────┐
+│           genui-firebase (optional module)            │
+│                                                      │
+│  FirebaseAiContentGenerator                          │
+│  ← Firebase AI Logic SDK (no raw API key,            │
+│    rate limiting, production-ready)                   │
+└──────────────────────────────────────────────────────┘
+```
 
 ## Modules
-- `genui/`: library module (A2UI model, JSON parser, catalog registry, renderer, session loop).
-- `app/`: sample Android app demonstrating A2UI rendering and event handling.
 
-## Getting started
-Requirements:
-- Android Studio (latest stable)
-- Android SDK 34+
-- Kotlin 1.9.x
-- JDK 17+
+| Module | Description |
+|--------|-------------|
+| `genui` | Core SDK — rendering, catalog, conversation, LLM adapters (Anthropic, OpenAI, Gemini) |
+| `genui-firebase` | Firebase AI content generator — production-grade, no exposed API key |
+| `app` | Demo app with clean architecture (domain/data/presentation layers) |
 
-### Build from command line
-```bash
-./gradlew build        # Build the project
-./gradlew test         # Run unit tests
-./gradlew :app:installDebug  # Install demo app
-```
+## Content Generators
 
-### Or with Android Studio
-Open the project in Android Studio, sync Gradle, and run the `app` module.
-
-## Example
-The sample app renders a simple A2UI document at runtime. See:
-- `app/src/main/java/com/example/composegenui/MainActivity.kt`
-
-## A2UI compatibility
-This SDK aims to stay aligned with the A2UI format so agent outputs can be shared across ecosystems. The renderer currently supports a minimal subset of components and properties; the catalog is intentionally strict to keep generated UI safe and predictable.
-
-## LLM Connectors
-
-Generate A2UI interfaces using LLMs from Anthropic, OpenAI, or Google:
+### Raw API (prototyping)
 
 ```kotlin
-// Using Anthropic Claude
-val generator = A2UiLlmGeneratorFactory.create(
-    provider = LlmProvider.ANTHROPIC,
-    apiKey = "your-anthropic-key"
+// Anthropic Claude
+val generator = AnthropicContentGenerator(
+    apiKey = "your-key",
+    model = "claude-sonnet-4-5-20250929"  // default
 )
 
-// Using OpenAI GPT
-val generator = A2UiLlmGeneratorFactory.create(
-    provider = LlmProvider.OPENAI,
-    apiKey = "your-openai-key",
-    model = "gpt-4-turbo" // optional, defaults to gpt-4o
+// OpenAI GPT
+val generator = OpenAiContentGenerator(
+    apiKey = "your-key",
+    model = "gpt-4o"  // default
 )
 
-// Using Google Gemini
-val generator = A2UiLlmGeneratorFactory.create(
-    provider = LlmProvider.GEMINI,
-    apiKey = "your-gemini-key"
+// Google Gemini
+val generator = GeminiContentGenerator(
+    apiKey = "your-key",
+    model = "gemini-2.0-flash"  // default
 )
-
-// Generate UI from a prompt
-val document = generator.generateFromPrompt("Create a login form with email and password")
-
-// Or use with session for interactive updates
-val session = A2UiSession(initialDocument, generator)
-session.handleEvent(event) // LLM generates updated UI
 ```
 
-### DSL Builder
+### Firebase AI (production)
+
+No API key in app. Requires Firebase project setup.
 
 ```kotlin
-val generator = a2uiLlmGenerator {
-    provider = LlmProvider.ANTHROPIC
-    apiKey = "your-key"
-    model = "claude-3-opus-20240229"
-    temperature = 0.5f
-    maxTokens = 4096
-    systemPrompt = "Custom system prompt..." // optional
-    baseUrl = "https://proxy.example.com" // optional, for proxies
+// Google AI backend (free tier)
+val generator = FirebaseAiContentGenerator(
+    modelName = "gemini-2.0-flash",
+    backend = GenerativeBackend.googleAI()
+)
+
+// Vertex AI backend (production billing)
+val generator = FirebaseAiContentGenerator(
+    modelName = "gemini-2.0-flash",
+    backend = GenerativeBackend.vertexAI()
+)
+```
+
+### Custom
+
+Implement `GenUiContentGenerator` for any backend:
+
+```kotlin
+class MyCustomGenerator : GenUiContentGenerator {
+    override fun generate(request: GenUiRequest): Flow<GenUiResponse> = flow {
+        // Your logic here
+        emit(GenUiResponse.UiDocument(jsonString))
+        emit(GenUiResponse.Done)
+    }
+    override fun clearHistory() {}
 }
 ```
 
-### Supported Providers
+## Usage with ViewModel
 
-| Provider | Default Model | API Endpoint |
-|----------|--------------|--------------|
-| ANTHROPIC | claude-sonnet-4-20250514 | api.anthropic.com |
-| OPENAI | gpt-4o | api.openai.com |
-| GEMINI | gemini-2.0-flash | generativelanguage.googleapis.com |
+```kotlin
+class ChatViewModel : ViewModel() {
+    private val generator = GeminiContentGenerator(
+        apiKey = BuildConfig.LLM_API_KEY
+    )
+
+    val conversation = GenUiConversation(
+        catalog = defaultGenUiCatalog(),
+        contentGenerator = generator,
+        onError = { error -> /* handle */ },
+        scope = viewModelScope
+    )
+
+    fun send(prompt: String) = conversation.sendRequest(prompt)
+    fun reset() = conversation.reset()
+}
+
+@Composable
+fun ChatScreen(vm: ChatViewModel) {
+    // That's it — GenUiSurface observes conversation state and renders
+    GenUiSurface(conversation = vm.conversation)
+}
+```
+
+## Built-in Components (60+)
+
+### Layout
+`column`, `row`, `box`, `surface`, `card`, `elevatedCard`, `outlinedCard`, `spacer`, `divider`, `scaffold`, `scrollColumn`, `scrollRow`, `list`, `listRow`, `listItem`
+
+### Input
+`textfield`, `button`, `elevatedButton`, `tonalButton`, `textButton`, `outlinedButton`, `iconButton`, `filledIconButton`, `outlinedIconButton`, `iconToggleButton`, `checkbox`, `triStateCheckbox`, `radio`, `switch`, `slider`, `rangeSlider`, `stepper`, `segmentedButton`, `segment`, `searchBar`, `dropdown`, `option`
+
+### Navigation
+`topAppBar`, `centerTopAppBar`, `mediumTopAppBar`, `largeTopAppBar`, `bottomAppBar`, `navigationBar`, `navItem`, `navigationRail`, `railItem`, `navigationDrawer`, `drawerItem`, `tabs`, `tab`, `menu`, `menuItem`, `dialog`, `bottomSheet`, `bottomSheetScaffold`
+
+### Feedback
+`progress`, `snackbar`, `badge`, `fab`, `banner`, `tooltip`, `richTooltip`, `swipeToDismiss`
+
+### Media & Display
+`text`, `image`, `icon`, `avatar`, `listItemM3`
+
+### Chips
+`chip`, `filterChip`, `inputChip`, `suggestionChip`
+
+### Paging & Pickers
+`horizontalPager`, `verticalPager`, `page`, `datePicker`, `timePicker`
 
 ## Schema Validation
 
-Validate A2UI documents with comprehensive checks:
-
 ```kotlin
-// Basic validation
-val result = validateA2Ui(document)
+val result = validateA2Ui(document, options = A2UiValidationOptions(
+    strict = true,
+    checkIds = true,
+    checkStructure = true,
+    checkValues = true,
+    checkIcons = true
+))
+
 if (!result.isValid) {
     result.errors.forEach { println("Error: ${it.message}") }
 }
-
-// Strict validation with all checks
-val result = validateA2Ui(document, options = A2UiValidationOptions(
-    strict = true,           // Warn on unknown props
-    checkIds = true,         // Check for duplicate IDs
-    checkStructure = true,   // Validate parent-child relationships
-    checkValues = true,      // Validate prop types and ranges
-    checkIcons = true        // Validate icon names
-))
-
-// Check results
-result.isValid      // true if no errors
-result.hasWarnings  // true if any warnings
-result.errors       // list of validation errors
-result.warnings     // list of validation warnings
 ```
 
-### Validation Features
-- **Unknown component detection**: Error on unrecognized component types
-- **Required prop checking**: Error when required props are missing
-- **Duplicate ID detection**: Error when same ID is used multiple times
-- **Structural validation**: Warn when components are in wrong context (e.g., `segment` outside `segmentedButton`)
-- **Value validation**: Warn on invalid variants, negative dimensions, out-of-range values
-- **Icon validation**: Warn on unrecognized icon names
-- **Strict mode**: Warn on any unknown props
+## Error Handling
+
+Components render inside error boundaries. If a component throws, a fallback card is shown instead of crashing:
+
+```kotlin
+// Automatic — error boundaries wrap every component
+A2UiRender(document, state, onEvent)
+```
+
+## Demo App
+
+The demo app showcases the SDK with clean architecture:
+
+```
+app/
+├── MainActivity.kt              ← setContent { DemoApp() }
+├── DemoApp.kt                   ← theme + navigation + VM wiring
+├── data/                        ← SettingsRepository, DemoSettings
+├── domain/                      ← LlmConfig, CreateContentGeneratorUseCase
+├── presentation/
+│   ├── components/              ← M3 component showcase
+│   ├── templates/               ← A2UI template rendering
+│   ├── chat/                    ← ChatViewModel + GenUiSurface
+│   └── settings/                ← Provider picker, API key, model
+└── ui/                          ← Theme, colors, reusable composables
+```
+
+## Tech Stack
+
+| Dependency | Version |
+|---|---|
+| Kotlin | 2.1.10 |
+| Compose BOM | 2025.01.01 |
+| compileSdk / targetSdk | 35 |
+| minSdk | 24 |
+| Firebase BOM | 34.8.0 |
+| OkHttp | 4.12.0 |
+| Coil | 3.1.0 |
+| kotlinx-serialization | 1.7.3 |
+
+## Getting Started
+
+**Requirements:** Android Studio, SDK 35+, Kotlin 2.1+, JDK 17+
+
+```bash
+./gradlew build               # Build all modules
+./gradlew test                # Run unit tests
+./gradlew :app:installDebug   # Install demo app
+```
+
+## Comparison with Flutter GenUI
+
+| | Flutter GenUI | Compose GenUI |
+|---|---|---|
+| **Orchestration** | `GenUiConversation` | `GenUiConversation` |
+| **Rendering** | `GenUiSurface` | `GenUiSurface` |
+| **Catalog** | `Catalog` + `CatalogItem` | `GenUiCatalog` + `GenUiCatalogItem` |
+| **LLM interface** | `ContentGenerator` | `GenUiContentGenerator` |
+| **Firebase** | `genui_firebase_ai` package | `genui-firebase` module |
+| **Raw Gemini** | `genui_google_generative_ai` package | `GeminiContentGenerator` (built-in) |
+| **Additional providers** | — | `AnthropicContentGenerator`, `OpenAiContentGenerator` |
+| **State** | `DataModel` | `A2UiState` via `StateFlow` |
+| **UI format** | A2UI JSON | A2UI JSON |
 
 ## Roadmap
-- ~~Expand component catalog~~ ✅ 55+ components
-- ~~Add LLM connectors~~ ✅ Anthropic, OpenAI, Gemini
-- ~~Enhanced schema validation~~ ✅ Structural, value, and icon checks
-- Add streaming support for LLM responses
-- Add more unit tests
+
+- [x] 60+ Material 3 components
+- [x] Multi-provider LLM support (Anthropic, OpenAI, Gemini)
+- [x] Firebase AI content generator
+- [x] Orchestration facade (GenUiConversation)
+- [x] Composable surface binding (GenUiSurface)
+- [x] Schema validation
+- [x] Error boundaries
+- [ ] Streaming support for LLM responses
+- [ ] Multi-surface support (one conversation, multiple surfaces)
+- [ ] DataModel reactive state store
+- [ ] More unit tests
 
 ## Contributing
-Contributions are welcome. Please open an issue or PR with:
-- A clear description of the change.
-- Any relevant design notes or compatibility concerns.
 
-If you add new components, include:
-- JSON schema updates (if applicable).
-- Catalog entry + renderer mapping.
-- Demo usage in the sample app.
-
-## Code of Conduct
-TBD. A standard Code of Conduct will be added before the first release.
-
-## Security
-Please report security issues responsibly. A `SECURITY.md` will be added as the project matures.
+Contributions welcome. Please open an issue or PR. If adding components, include schema updates, catalog entry, and demo usage.
 
 ## License
+
 MIT License. See `LICENSE`.
 
 ## Maintainers
+
 - Nikhil Bhutani
 
 ## Acknowledgements
-Inspired by Flutter GenUI and the A2UI initiative.
+
+Inspired by [Flutter GenUI](https://docs.flutter.dev/ai/genui) and the A2UI initiative.
