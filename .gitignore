@@ -1,4 +1,27 @@
+# Built outputs
+build/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Gradle
 .gradle/
-app/build/
-genui/build/
+gradle-app.setting
+!gradle-wrapper.jar
+
+# Local config
 local.properties
+
+# IDE - Android Studio / IntelliJ
+.idea/
+*.iml
+.DS_Store
+
+# Native
+.cxx/
+.externalNativeBuild/
+captures/
+
+# Kotlin
+*.kotlin_module
