@@ -1,8 +1,10 @@
 # Compose GenUI
 
-Compose GenUI is a Jetpack Compose SDK that turns **natural-language prompts into native Android UIs** using the A2UI (Agent-to-User Interface) JSON format. Pass an API key, send a prompt, get a rendered UI — the SDK handles the agentic loop, conversation history, component catalog, and rendering.
+Compose GenUI is a Jetpack Compose SDK that turns **natural-language prompts into native Android UIs** using an A2UI-inspired JSON format. Pass an API key, send a prompt, get a rendered UI — the SDK handles the agentic loop, conversation history, component catalog, and rendering.
 
-Inspired by [Flutter GenUI](https://docs.flutter.dev/ai/genui) and aligned with the A2UI ecosystem.
+> **A2UI alignment:** This SDK uses a tree-structured document model inspired by the [A2UI](https://a2ui.org) specification. It does not yet implement the v0.8 streaming JSONL protocol, message types (`surfaceUpdate`/`dataModelUpdate`/`beginRendering`), or JSON Pointer data binding. See [Roadmap](#roadmap) for protocol compliance plans.
+
+Inspired by [Flutter GenUI](https://docs.flutter.dev/ai/genui) and the [A2UI](https://a2ui.org) initiative.
 
 Repository: https://github.com/NikhilBhutani/compose-genui
 
@@ -81,7 +83,7 @@ sequenceDiagram
 └──────────────────────┬──────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────┐
-│              genui (core SDK)                        │
+│              genui (single SDK module)                │
 │                                                      │
 │  GenUiConversation    ← orchestration facade         │
 │  GenUiSurface         ← Composable binding           │
@@ -97,14 +99,9 @@ sequenceDiagram
 │  ├── AnthropicContentGenerator                       │
 │  ├── OpenAiContentGenerator                          │
 │  └── GeminiContentGenerator                          │
-└──────────────────────────────────────────────────────┘
-                       │
-┌──────────────────────▼──────────────────────────────┐
-│           genui-firebase (optional module)            │
 │                                                      │
-│  FirebaseAiContentGenerator                          │
-│  ← Firebase AI Logic SDK (no raw API key,            │
-│    rate limiting, production-ready)                   │
+│  firebase/                                           │
+│  └── FirebaseAiContentGenerator (optional dep)       │
 └──────────────────────────────────────────────────────┘
 ```
 
@@ -112,8 +109,7 @@ sequenceDiagram
 
 | Module | Description |
 |--------|-------------|
-| `genui` | Core SDK — rendering, catalog, conversation, LLM adapters (Anthropic, OpenAI, Gemini) |
-| `genui-firebase` | Firebase AI content generator — production-grade, no exposed API key |
+| `genui` | The SDK — rendering, catalog, conversation, all LLM adapters (Anthropic, OpenAI, Gemini, Firebase AI) |
 | `app` | Demo app with clean architecture (domain/data/presentation layers) |
 
 ## Content Generators
@@ -143,6 +139,16 @@ val generator = GeminiContentGenerator(
 ### Firebase AI (production)
 
 No API key in app. Requires Firebase project setup.
+
+`FirebaseAiContentGenerator` uses Firebase AI as a `compileOnly` dependency — it ships with the SDK but won't load unless you add Firebase to your app. Add to your `build.gradle.kts`:
+
+```kotlin
+// Required for FirebaseAiContentGenerator
+implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
+implementation("com.google.firebase:firebase-ai")
+```
+
+Then use it:
 
 ```kotlin
 // Google AI backend (free tier)
@@ -304,6 +310,7 @@ app/
 
 ## Roadmap
 
+### Done
 - [x] 60+ Material 3 components
 - [x] Multi-provider LLM support (Anthropic, OpenAI, Gemini)
 - [x] Firebase AI content generator
@@ -311,9 +318,19 @@ app/
 - [x] Composable surface binding (GenUiSurface)
 - [x] Schema validation
 - [x] Error boundaries
-- [ ] Streaming support for LLM responses
-- [ ] Multi-surface support (one conversation, multiple surfaces)
+- [x] CI (GitHub Actions)
+- [x] Maven publish configuration
+
+### A2UI Protocol Compliance
+- [ ] Streaming JSONL format with incremental updates
+- [ ] Message types: `surfaceUpdate`, `dataModelUpdate`, `beginRendering`, `deleteSurface`
+- [ ] Adjacency-list component model (flat list with ID references)
+- [ ] JSON Pointer data binding (`/path/to/value`)
 - [ ] DataModel reactive state store
+
+### SDK Enhancements
+- [ ] Multi-surface support (one conversation, multiple surfaces)
+- [ ] Transport integrations (A2A, AG-UI, SSE, WebSockets)
 - [ ] More unit tests
 
 ## Contributing
@@ -330,4 +347,4 @@ MIT License. See `LICENSE`.
 
 ## Acknowledgements
 
-Inspired by [Flutter GenUI](https://docs.flutter.dev/ai/genui) and the A2UI initiative.
+Inspired by [Flutter GenUI](https://docs.flutter.dev/ai/genui) and the [A2UI](https://a2ui.org) initiative.

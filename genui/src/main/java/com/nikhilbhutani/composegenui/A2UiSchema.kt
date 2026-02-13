@@ -1,5 +1,6 @@
 package com.nikhilbhutani.composegenui
 
+/** Schema specification for a single A2UI component type. Used for validation and LLM prompting. */
 data class A2UiComponentSpec(
     val type: String,
     val requiredProps: Set<String> = emptySet(),
@@ -7,10 +8,12 @@ data class A2UiComponentSpec(
     val allowChildren: Boolean = true
 )
 
+/** Registry of all known component specs, keyed by type name. */
 data class A2UiSchema(
     val components: Map<String, A2UiComponentSpec>
 )
 
+/** Returns the default schema containing all 60+ built-in component specs. */
 fun defaultA2UiSchema(): A2UiSchema {
     val commonLayoutProps = setOf(
         "padding", "spacing", "fill", "width", "height", "size",

@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/** Wraps [content] in an error boundary. If the content throws, [fallback] is rendered instead. */
 @Composable
 fun A2UiErrorBoundary(
     fallback: @Composable (Throwable) -> Unit = { DefaultErrorFallback(it) },
@@ -53,6 +54,7 @@ internal fun DefaultErrorFallback(error: Throwable, componentType: String? = nul
     }
 }
 
+/** Default loading indicator shown by [GenUiSurface] while the generator is working. */
 @Composable
 fun A2UiLoadingIndicator(modifier: Modifier = Modifier) {
     Column(

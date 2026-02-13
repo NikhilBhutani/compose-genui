@@ -3,6 +3,7 @@ package com.nikhilbhutani.composegenui
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+/** JSON serialization utilities for A2UI documents. */
 object A2UiJson {
     val instance: Json = Json {
         ignoreUnknownKeys = true
@@ -17,6 +18,7 @@ object A2UiJson {
         instance.encodeToString(document)
 }
 
+/** Convenience function to parse a JSON string into an [A2UiDocument]. */
 fun parseA2UiDocument(json: String): A2UiDocument =
     A2UiJson.decodeDocument(json)
 
