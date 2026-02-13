@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "compose-genui"
-include(":app", ":genui", ":genui-firebase")
+include(":app", ":genui")
