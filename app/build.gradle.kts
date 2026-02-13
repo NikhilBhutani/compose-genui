@@ -37,7 +37,10 @@ android {
 
 dependencies {
     implementation(project(":genui"))
-    implementation(project(":genui-firebase"))
+
+    // Firebase AI — required at runtime for FirebaseAiContentGenerator
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.ai)
 
     implementation(platform(libs.compose.bom))
     implementation(libs.activity.compose)

@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose.compiler)
+    `maven-publish`
 }
 
 android {
@@ -25,14 +26,18 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = "1.8"
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                groupId = property("GROUP").toString()
+                artifactId = "genui"
+                version = property("VERSION_NAME").toString()
+            }
+        }
     }
 }
 
@@ -47,6 +52,11 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp)
+
+    // Firebase AI — compileOnly so apps that don't use FirebaseAiContentGenerator
+    // don't need the Firebase SDK. Apps using it must add firebase-ai themselves.
+    compileOnly(platform(libs.firebase.bom))
+    compileOnly(libs.firebase.ai)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlin.test.junit)

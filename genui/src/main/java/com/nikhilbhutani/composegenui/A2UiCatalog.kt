@@ -2,6 +2,7 @@ package com.nikhilbhutani.composegenui
 
 import androidx.compose.runtime.Composable
 
+/** Low-level rendering interface. Maps [A2UiNode] types to Composable renderers. */
 interface A2UiCatalog {
     @Composable
     fun Render(
@@ -12,6 +13,7 @@ interface A2UiCatalog {
     )
 }
 
+/** Default [A2UiCatalog] implementation backed by a map of renderers with error boundaries. */
 class A2UiCatalogRegistry(
     private val renderers: Map<String, A2UiRenderer>
 ) : A2UiCatalog {
@@ -47,6 +49,7 @@ class A2UiCatalogRegistry(
     }
 }
 
+/** Type alias for a Composable that renders a single [A2UiNode]. */
 typealias A2UiRenderer = @Composable (
     node: A2UiNode,
     state: A2UiState,

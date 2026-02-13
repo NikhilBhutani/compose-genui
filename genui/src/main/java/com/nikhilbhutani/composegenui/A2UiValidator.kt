@@ -6,8 +6,10 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.intOrNull
 
+/** Severity level for validation issues. */
 enum class ValidationSeverity { ERROR, WARNING, INFO }
 
+/** A single validation issue found in an A2UI document. */
 sealed class A2UiValidationIssue(
     open val path: String,
     open val message: String,
@@ -21,6 +23,7 @@ sealed class A2UiValidationIssue(
         A2UiValidationIssue(path, message, ValidationSeverity.INFO)
 }
 
+/** Aggregated result of validating an A2UI document against a schema. */
 data class A2UiValidationResult(
     val issues: List<A2UiValidationIssue>
 ) {
@@ -41,6 +44,7 @@ data class A2UiValidationResult(
     }
 }
 
+/** Options controlling which validation checks are performed. */
 data class A2UiValidationOptions(
     val strict: Boolean = false,
     val checkIds: Boolean = true,
@@ -70,6 +74,7 @@ fun validateA2Ui(
     return validator.validate(document)
 }
 
+/** Validates an [A2UiDocument] against an [A2UiSchema], checking types, props, structure, and values. */
 class A2UiValidator(
     private val schema: A2UiSchema,
     private val options: A2UiValidationOptions

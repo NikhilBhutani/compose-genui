@@ -9,6 +9,7 @@ build/
 .gradle/
 gradle-app.setting
 !gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
 # Local config
 local.properties
@@ -25,3 +26,13 @@ captures/
 
 # Kotlin
 *.kotlin_module
+
+# Google Services (contains project-specific keys)
+google-services.json
+
+# Keystore
+*.jks
+*.keystore
+
+# Logs
+*.log

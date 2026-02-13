@@ -6,6 +6,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+/** Renders an [A2UiDocument] using the given [catalog], [state], and event handler. */
 @Composable
 fun A2UiRender(
     document: A2UiDocument,
@@ -16,6 +17,7 @@ fun A2UiRender(
     RenderNode(document.root, catalog, state, onEvent)
 }
 
+/** Lower-level surface that wraps [A2UiRender] and converts events into [A2UiUserAction]s. */
 @Composable
 fun A2UiSurface(
     surfaceId: String,
